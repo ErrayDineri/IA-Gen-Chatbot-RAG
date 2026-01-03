@@ -82,14 +82,22 @@ class VectorStore:
             chunk_id = f"{pdf_id}_chunk_{i}"
             
             # Build metadata (ChromaDB requires flat structure)
+            # Store tags as comma-separated string for display
+            # Also store each tag as separate boolean field for filtering (tag_<tagname> = "1")
+            tags_str = ",".join(tags) if tags else ""
             metadata = {
                 "pdf_id": pdf_id,
                 "filename": filename,
-                "tags": ",".join(tags) if tags else "",  # Store as comma-separated string
+                "tags": tags_str,  # For display purposes
                 "chunk_index": chunk["metadata"].get("chunk_index", i),
                 "page_num": chunk["metadata"].get("page_num", 0),
                 "char_count": chunk["metadata"].get("char_count", len(chunk["text"]))
             }
+            # Add each tag as a separate boolean field for filtering
+            for tag in tags:
+                # Sanitize tag name for metadata key (replace spaces/special chars)
+                safe_tag = tag.lower().replace(" ", "_").replace("-", "_")
+                metadata[f"tag_{safe_tag}"] = "1"
             
             ids.append(chunk_id)
             documents.append(chunk["text"])
@@ -139,10 +147,12 @@ class VectorStore:
         where_conditions = []
         
         if tags and len(tags) > 0:
-            # Filter by tags (documents that contain any of the specified tags)
+            # Filter by tags - each tag is stored as tag_<tagname> = "1"
+            # Use $or logic: document matches if it has ANY of the selected tags
             tag_conditions = []
             for tag in tags:
-                tag_conditions.append({"tags": {"$contains": tag}})
+                safe_tag = tag.lower().replace(" ", "_").replace("-", "_")
+                tag_conditions.append({f"tag_{safe_tag}": {"$eq": "1"}})
             
             if len(tag_conditions) == 1:
                 where_conditions.append(tag_conditions[0])
@@ -242,12 +252,25 @@ class VectorStore:
             )
             
             if results and results["ids"]:
+                # Store tags as comma-separated string for display
                 tags_str = ",".join(new_tags) if new_tags else ""
                 
                 # Update each chunk's metadata
                 for i, chunk_id in enumerate(results["ids"]):
                     current_metadata = results["metadatas"][i]
+                    
+                    # Remove old tag_ fields
+                    keys_to_remove = [k for k in current_metadata.keys() if k.startswith("tag_")]
+                    for key in keys_to_remove:
+                        del current_metadata[key]
+                    
+                    # Set new tags string
                     current_metadata["tags"] = tags_str
+                    
+                    # Add new tag_ fields for filtering
+                    for tag in new_tags:
+                        safe_tag = tag.lower().replace(" ", "_").replace("-", "_")
+                        current_metadata[f"tag_{safe_tag}"] = "1"
                     
                     self.collection.update(
                         ids=[chunk_id],
@@ -272,6 +295,7 @@ class VectorStore:
                 for metadata in results["metadatas"]:
                     tags_str = metadata.get("tags", "")
                     if tags_str:
+                        # Parse comma-separated format: tag1,tag2,tag3
                         for tag in tags_str.split(","):
                             tag = tag.strip()
                             if tag:
