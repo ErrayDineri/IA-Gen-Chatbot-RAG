@@ -28,9 +28,12 @@ if (!fs.existsSync(uploadsDir)) {
 // Database simulation (in-memory storage)
 // In production, you would use a real database
 let pdfsDatabase = [];
+let chatsDatabase = [];
 
 // Load database from file if exists
 const dbPath = path.join(__dirname, 'database.json');
+const chatsDbPath = path.join(__dirname, 'chats.json');
+
 if (fs.existsSync(dbPath)) {
   try {
     const data = fs.readFileSync(dbPath, 'utf8');
@@ -40,12 +43,29 @@ if (fs.existsSync(dbPath)) {
   }
 }
 
+if (fs.existsSync(chatsDbPath)) {
+  try {
+    const data = fs.readFileSync(chatsDbPath, 'utf8');
+    chatsDatabase = JSON.parse(data);
+  } catch (error) {
+    console.error('Error loading chats database:', error);
+  }
+}
+
 // Save database to file with UTF-8 encoding
 function saveDatabase() {
   try {
     fs.writeFileSync(dbPath, JSON.stringify(pdfsDatabase, null, 2), 'utf8');
   } catch (error) {
     console.error('Error saving database:', error);
+  }
+}
+
+function saveChatsDatabase() {
+  try {
+    fs.writeFileSync(chatsDbPath, JSON.stringify(chatsDatabase, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error saving chats database:', error);
   }
 }
 
@@ -165,6 +185,67 @@ app.delete('/api/pdfs/:id', (req, res) => {
   saveDatabase();
 
   res.json({ message: 'PDF deleted successfully' });
+});
+
+// Chat History Routes
+
+// Get all chats
+app.get('/api/chats', (req, res) => {
+  res.json(chatsDatabase);
+});
+
+// Get a specific chat
+app.get('/api/chats/:id', (req, res) => {
+  const chat = chatsDatabase.find(c => c.id === req.params.id);
+  if (!chat) {
+    return res.status(404).json({ error: 'Chat not found' });
+  }
+  res.json(chat);
+});
+
+// Save a chat
+app.post('/api/chats', (req, res) => {
+  try {
+    const { id, name, messages, date } = req.body;
+    
+    const chatData = {
+      id: id || uuidv4(),
+      name: name || 'New Chat',
+      messages: messages || [],
+      date: date || new Date().toISOString()
+    };
+
+    // Update existing or add new
+    const existingIndex = chatsDatabase.findIndex(c => c.id === chatData.id);
+    if (existingIndex >= 0) {
+      chatsDatabase[existingIndex] = chatData;
+    } else {
+      chatsDatabase.unshift(chatData);
+    }
+
+    // Keep only last 50 chats
+    chatsDatabase = chatsDatabase.slice(0, 50);
+    saveChatsDatabase();
+
+    res.status(201).json(chatData);
+  } catch (error) {
+    console.error('Error saving chat:', error);
+    res.status(500).json({ error: 'Error saving chat' });
+  }
+});
+
+// Delete a chat
+app.delete('/api/chats/:id', (req, res) => {
+  const chatIndex = chatsDatabase.findIndex(c => c.id === req.params.id);
+  
+  if (chatIndex === -1) {
+    return res.status(404).json({ error: 'Chat not found' });
+  }
+
+  chatsDatabase.splice(chatIndex, 1);
+  saveChatsDatabase();
+
+  res.json({ message: 'Chat deleted successfully' });
 });
 
 // Error handling middleware
