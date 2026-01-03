@@ -1,0 +1,117 @@
+"""PDF text extraction using PyMuPDF."""
+
+import fitz  # PyMuPDF
+from typing import List, Dict, Any
+import os
+
+
+def extract_text_from_pdf(file_path: str) -> Dict[str, Any]:
+    """
+    Extract text from a PDF file with page-level granularity.
+    
+    Args:
+        file_path: Path to the PDF file
+        
+    Returns:
+        Dictionary with:
+            - pages: List of {page_num, text}
+            - total_pages: Total number of pages
+            - metadata: PDF metadata
+            - full_text: Concatenated text from all pages
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"PDF file not found: {file_path}")
+    
+    try:
+        doc = fitz.open(file_path)
+        
+        pages = []
+        full_text_parts = []
+        total_pages = len(doc)
+        
+        for page_num in range(total_pages):
+            page = doc[page_num]
+            text = page.get_text("text")
+            
+            # Clean up text
+            text = text.strip()
+            
+            if text:
+                pages.append({
+                    "page_num": page_num + 1,  # 1-indexed
+                    "text": text
+                })
+                full_text_parts.append(text)
+        
+        # Get PDF metadata
+        metadata = doc.metadata or {}
+        
+        result = {
+            "pages": pages,
+            "total_pages": total_pages,
+            "metadata": {
+                "title": metadata.get("title", ""),
+                "author": metadata.get("author", ""),
+                "subject": metadata.get("subject", ""),
+                "creator": metadata.get("creator", ""),
+                "creation_date": metadata.get("creationDate", ""),
+            },
+            "full_text": "\n\n".join(full_text_parts)
+        }
+        
+        doc.close()
+        
+        return result
+        
+    except Exception as e:
+        raise Exception(f"Error extracting text from PDF: {str(e)}")
+
+
+def extract_text_from_bytes(file_bytes: bytes, filename: str = "document.pdf") -> Dict[str, Any]:
+    """
+    Extract text from PDF bytes.
+    
+    Args:
+        file_bytes: PDF file as bytes
+        filename: Original filename for metadata
+        
+    Returns:
+        Same structure as extract_text_from_pdf
+    """
+    try:
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+        
+        pages = []
+        full_text_parts = []
+        
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            text = page.get_text("text")
+            text = text.strip()
+            
+            if text:
+                pages.append({
+                    "page_num": page_num + 1,
+                    "text": text
+                })
+                full_text_parts.append(text)
+        
+        metadata = doc.metadata or {}
+        total_pages = len(doc)
+        doc.close()
+        
+        return {
+            "pages": pages,
+            "total_pages": total_pages,
+            "metadata": {
+                "title": metadata.get("title", "") or filename,
+                "author": metadata.get("author", ""),
+                "subject": metadata.get("subject", ""),
+                "creator": metadata.get("creator", ""),
+                "creation_date": metadata.get("creationDate", ""),
+            },
+            "full_text": "\n\n".join(full_text_parts)
+        }
+        
+    except Exception as e:
+        raise Exception(f"Error extracting text from PDF bytes: {str(e)}")

@@ -43,6 +43,36 @@ function App() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    try {
+      await axios.delete('/api/pdfs');
+      fetchPDFs();
+    } catch (error) {
+      console.error('Error deleting all PDFs:', error);
+    }
+  };
+
+  const handleRetryRag = async (id) => {
+    try {
+      await axios.post(`/api/rag/reprocess/${id}`);
+      // Poll for updates
+      setTimeout(fetchPDFs, 1000);
+      setTimeout(fetchPDFs, 3000);
+      setTimeout(fetchPDFs, 6000);
+    } catch (error) {
+      console.error('Error retrying RAG:', error);
+    }
+  };
+
+  // Poll for RAG status updates when there are processing PDFs
+  useEffect(() => {
+    const hasProcessing = pdfs.some(p => p.ragStatus === 'processing');
+    if (hasProcessing) {
+      const interval = setInterval(fetchPDFs, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [pdfs]);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -58,6 +88,8 @@ function App() {
             pdfs={pdfs} 
             onTagUpdate={handleTagUpdate}
             onDelete={handleDelete}
+            onDeleteAll={handleDeleteAll}
+            onRetryRag={handleRetryRag}
           />
         </main>
       </div>

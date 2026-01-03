@@ -80,6 +80,10 @@ Use the following color palette throughout the application:
   - Express server in `server.js`
   - PDF uploads stored in `/backend/uploads`
   - Data files: `database.json` (PDFs), `chats.json` (chat history)
+- RAG Service in `/rag-service` directory
+  - FastAPI Python service for embedding, chunking, and retrieval
+  - ChromaDB vector storage in `rag-service/chroma_data/`
+  - Configuration in `rag-service/config.py`
 - Configuration in `.github/copilot-instructions.md`
 
 ## Features to Maintain
@@ -98,14 +102,45 @@ Use the following color palette throughout the application:
   - Chat history with save/load/delete (backend storage)
   - New chat creation
   - Conversation memory for context
+  - RAG (Retrieval-Augmented Generation) integration:
+    - Toggle RAG mode on/off with search icon button
+    - Tag-based document filtering for targeted retrieval
+    - Source citations displayed below AI responses
+    - Semantic search across uploaded PDFs
+
+## RAG Pipeline Architecture
+
+### Technology Stack
+- **Embedding Model**: Qwen3-Embedding-4B (HuggingFace transformers)
+- **Vector Database**: ChromaDB with persistent storage
+- **Chunking**: LangChain SemanticChunker (splits at topic boundaries)
+- **PDF Extraction**: PyMuPDF (fitz) with page-level granularity
+- **Service**: FastAPI Python microservice on port 8001
+
+### RAG Service Files (rag-service/)
+- `config.py` - Configuration settings (model, paths, chunking thresholds)
+- `embeddings.py` - Singleton wrapper for HuggingFace embeddings
+- `chunker.py` - SemanticDocumentChunker with fallback to character splitting
+- `pdf_extractor.py` - PDF text extraction functions
+- `vector_store.py` - ChromaDB operations with tag filtering
+- `app.py` - FastAPI endpoints
+- `requirements.txt` - Python dependencies
+
+### RAG Workflow
+1. PDF uploaded → Backend sends to RAG service
+2. RAG service extracts text, chunks semantically, generates embeddings
+3. Chunks stored in ChromaDB with metadata (filename, tags, page)
+4. User query → RAG service finds similar chunks (optionally filtered by tags)
+5. Context injected into LLM prompt for grounded responses
+6. Sources displayed to user with similarity scores
 
 ## API Endpoints
 
 ### PDF Management
-- `POST /api/upload` - Upload PDF files with tags
+- `POST /api/upload` - Upload PDF files with tags (also processes for RAG)
 - `GET /api/pdfs` - Get all PDFs
-- `PUT /api/pdfs/:id` - Update PDF tags
-- `DELETE /api/pdfs/:id` - Delete PDF
+- `PUT /api/pdfs/:id` - Update PDF tags (syncs with RAG service)
+- `DELETE /api/pdfs/:id` - Delete PDF (removes from RAG index)
 
 ### Chat Management  
 - `GET /api/chats` - Get all saved chats
@@ -113,10 +148,39 @@ Use the following color palette throughout the application:
 - `POST /api/chats` - Save/create chat
 - `DELETE /api/chats/:id` - Delete chat
 
+### RAG Management (Backend)
+- `POST /api/rag/query` - Query RAG with optional tag filtering
+- `GET /api/rag/status` - Check RAG service availability
+- `GET /api/rag/tags` - Get all indexed tags
+- `GET /api/rag/stats` - Get RAG index statistics
+- `POST /api/rag/reprocess/:id` - Re-process a PDF for RAG
+
+### RAG Service (Port 8001)
+- `POST /process-pdf` - Process PDF bytes for indexing
+- `POST /process-pdf-path` - Process PDF from file path
+- `POST /query` - Semantic search with tag filtering
+- `DELETE /document/{id}` - Remove document from index
+- `PUT /document/{id}/tags` - Update document tags
+- `GET /tags` - Get all unique tags
+- `GET /stats` - Get index statistics
+- `GET /health` - Health check
+
 ### LLM Integration
 - External: `POST http://127.0.0.1:8000/chat/regular/stream`
   - Expects: `{ messages: [{role, content}], config: {temperature, limit} }`
   - Returns: NDJSON stream with format `{"content":"text"}`
+
+## Running the Application
+
+### Prerequisites
+- Node.js 18+
+- Python 3.10+ with CUDA (optional, for GPU acceleration)
+- LM Studio running with qwen3-4b model on port 8000
+
+### Start Services
+1. **RAG Service**: `cd rag-service && pip install -r requirements.txt && python app.py`
+2. **Backend**: `cd backend && npm install && node server.js`
+3. **Frontend**: `cd frontend && npm install && npm start`
 
 ## Important Notes
 - Do NOT create README files
@@ -127,3 +191,4 @@ Use the following color palette throughout the application:
 - Preserve existing functionality when adding new features
 - Use solid colors only (no gradients)
 - Window size preference stored in localStorage, chat history in backend
+- RAG service requires first-run model download (~8GB for Qwen3-Embedding-4B)

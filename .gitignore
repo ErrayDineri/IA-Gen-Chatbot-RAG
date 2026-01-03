@@ -1,0 +1,121 @@
+# =============================================================================
+# Node.js (Frontend & Backend)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn
+
+# Build outputs
+frontend/build/
+dist/
+
+# =============================================================================
+# Python (RAG Service)
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+.conda/
+*.egg-info/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyTorch / HuggingFace cache
+.cache/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# =============================================================================
+# Vector Database & Model Cache
+# =============================================================================
+rag-service/chroma_db/
+rag-service/chroma_data/
+*.sqlite3
+
+# HuggingFace models (large files, download on demand)
+.huggingface/
+
+# =============================================================================
+# Application Data (User uploads & databases)
+# =============================================================================
+backend/uploads/
+backend/database.json
+backend/chats.json
+
+# =============================================================================
+# Environment & Secrets
+# =============================================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+secrets.json
+
+# =============================================================================
+# IDE & Editor
+# =============================================================================
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# VS Code (keep tasks.json but ignore other settings)
+.vscode/*
+!.vscode/tasks.json
+
+# =============================================================================
+# OS Generated
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =============================================================================
+# Logs & Debug
+# =============================================================================
+logs/
+*.log
+lerna-debug.log*
+
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+coverage/
+.nyc_output/
+*.lcov
+.pytest_cache/
+htmlcov/
+
+# =============================================================================
+# Misc
+# =============================================================================
+*.tmp
+*.temp
+*.bak
+*.backup
+.cache/

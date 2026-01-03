@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import './PDFLibrary.css';
 
-function PDFLibrary({ pdfs, onTagUpdate, onDelete }) {
+function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
   const [editingId, setEditingId] = useState(null);
   const [editTags, setEditTags] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
@@ -57,7 +57,26 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete }) {
   return (
     <div className="library-container">
       <div className="library-header">
-        <h2>PDF Library ({filteredPdfs.length})</h2>
+        <div className="library-title-row">
+          <h2>PDF Library ({filteredPdfs.length})</h2>
+          {pdfs.length > 0 && (
+            <button 
+              className="delete-all-btn"
+              onClick={() => {
+                if (window.confirm(`Delete all ${pdfs.length} PDFs? This will also clear the vector database.`)) {
+                  onDeleteAll();
+                }
+              }}
+              title="Delete all PDFs"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Delete All
+            </button>
+          )}
+        </div>
         <div className="tag-filter">
           <label>Filter by tag:</label>
           <select 
@@ -98,6 +117,7 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete }) {
                 <th className="col-size">Size</th>
                 <th className="col-date">Date</th>
                 <th className="col-tags">Tags</th>
+                <th className="col-rag">RAG</th>
                 <th className="col-actions">Actions</th>
               </tr>
             </thead>
@@ -161,6 +181,57 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete }) {
                         </button>
                       </div>
                     )}
+                  </td>
+                  <td className="col-rag">
+                    <div className={`rag-status ${pdf.ragStatus || (pdf.ragProcessed ? 'success' : 'pending')}`} title={pdf.ragError || ''}>
+                      {(pdf.ragStatus === 'success' || pdf.ragProcessed) && (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                          <span>{pdf.chunksCount || 0} chunks</span>
+                        </>
+                      )}
+                      {pdf.ragStatus === 'failed' && (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                          </svg>
+                          <span>Failed</span>
+                          <button 
+                            className="retry-rag-btn"
+                            onClick={() => onRetryRag && onRetryRag(pdf.id)}
+                            title="Retry RAG processing"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="23 4 23 10 17 10"/>
+                              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      {pdf.ragStatus === 'processing' && (
+                        <>
+                          <span className="rag-spinner"></span>
+                          <span>Processing</span>
+                        </>
+                      )}
+                      {!pdf.ragStatus && !pdf.ragProcessed && (
+                        <button 
+                          className="process-rag-btn"
+                          onClick={() => onRetryRag && onRetryRag(pdf.id)}
+                          title="Process with RAG"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polygon points="10 8 16 12 10 16 10 8"/>
+                          </svg>
+                          <span>Process</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                   <td className="col-actions">
                     <a 

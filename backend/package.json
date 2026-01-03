@@ -7,13 +7,18 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["pdf", "upload", "express"],
+  "keywords": [
+    "pdf",
+    "upload",
+    "express"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
     "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "form-data": "^4.0.5",
+    "multer": "^1.4.5-lts.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

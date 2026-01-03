@@ -4,9 +4,11 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const FormData = require('form-data');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const RAG_SERVICE_URL = process.env.RAG_SERVICE_URL || 'http://localhost:8001';
 
 // Middleware
 app.use(cors());
@@ -129,13 +131,24 @@ app.post('/api/upload', upload.array('pdfs', 20), (req, res) => {
         size: file.size,
         url: `/uploads/${file.filename}`,
         tags: tags,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date().toISOString(),
+        ragStatus: 'processing', // 'processing', 'success', 'failed'
+        ragError: null,
+        chunksCount: 0
       };
       pdfsDatabase.push(pdfData);
       return pdfData;
     });
 
     saveDatabase();
+
+    // Process PDFs with RAG service (async, don't wait)
+    uploadedPdfs.forEach(pdf => {
+      processPdfWithRag(pdf).catch(err => {
+        console.error(`Error processing PDF ${pdf.id} with RAG:`, err.message);
+        // Status already updated in processPdfWithRag catch block
+      });
+    });
 
     res.status(201).json({
       message: `${uploadedPdfs.length} PDF(s) uploaded successfully`,
@@ -147,8 +160,60 @@ app.post('/api/upload', upload.array('pdfs', 20), (req, res) => {
   }
 });
 
+// Process PDF with RAG service
+async function processPdfWithRag(pdf) {
+  try {
+    const filePath = path.join(uploadsDir, pdf.storedFilename);
+    
+    // Use the path-based endpoint to avoid multipart parsing issues
+    const response = await fetch(`${RAG_SERVICE_URL}/process-pdf-path`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pdf_id: pdf.id,
+        filename: pdf.filename,
+        tags: pdf.tags,
+        file_path: filePath
+      })
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`RAG service error: ${error}`);
+    }
+    
+    const result = await response.json();
+    console.log(`RAG processed ${pdf.filename}: ${result.chunks_created} chunks`);
+    
+    // Update PDF with RAG status - success
+    const pdfIndex = pdfsDatabase.findIndex(p => p.id === pdf.id);
+    if (pdfIndex !== -1) {
+      pdfsDatabase[pdfIndex].ragStatus = 'success';
+      pdfsDatabase[pdfIndex].ragError = null;
+      pdfsDatabase[pdfIndex].chunksCount = result.chunks_created;
+      saveDatabase();
+    }
+    
+    return result;
+  } catch (error) {
+    console.error(`RAG processing failed for ${pdf.filename}:`, error.message);
+    
+    // Update PDF with RAG status - failed
+    const pdfIndex = pdfsDatabase.findIndex(p => p.id === pdf.id);
+    if (pdfIndex !== -1) {
+      pdfsDatabase[pdfIndex].ragStatus = 'failed';
+      pdfsDatabase[pdfIndex].ragError = error.message;
+      saveDatabase();
+    }
+    
+    throw error;
+  }
+}
+
 // Update PDF tags
-app.put('/api/pdfs/:id/tags', (req, res) => {
+app.put('/api/pdfs/:id/tags', async (req, res) => {
   const pdfIndex = pdfsDatabase.findIndex(p => p.id === req.params.id);
   
   if (pdfIndex === -1) {
@@ -158,6 +223,17 @@ app.put('/api/pdfs/:id/tags', (req, res) => {
   pdfsDatabase[pdfIndex].tags = req.body.tags || [];
   saveDatabase();
 
+  // Update tags in RAG service
+  try {
+    await fetch(`${RAG_SERVICE_URL}/document/${req.params.id}/tags`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pdf_id: req.params.id, tags: req.body.tags || [] })
+    });
+  } catch (error) {
+    console.error('Error updating tags in RAG service:', error.message);
+  }
+
   res.json({
     message: 'Tags updated successfully',
     pdf: pdfsDatabase[pdfIndex]
@@ -165,7 +241,7 @@ app.put('/api/pdfs/:id/tags', (req, res) => {
 });
 
 // Delete PDF
-app.delete('/api/pdfs/:id', (req, res) => {
+app.delete('/api/pdfs/:id', async (req, res) => {
   const pdfIndex = pdfsDatabase.findIndex(p => p.id === req.params.id);
   
   if (pdfIndex === -1) {
@@ -180,11 +256,55 @@ app.delete('/api/pdfs/:id', (req, res) => {
     fs.unlinkSync(filePath);
   }
 
+  // Delete from RAG service
+  try {
+    await fetch(`${RAG_SERVICE_URL}/document/${req.params.id}`, {
+      method: 'DELETE'
+    });
+  } catch (error) {
+    console.error('Error deleting from RAG service:', error.message);
+  }
+
   // Remove from database
   pdfsDatabase.splice(pdfIndex, 1);
   saveDatabase();
 
   res.json({ message: 'PDF deleted successfully' });
+});
+
+// Delete all PDFs
+app.delete('/api/pdfs', async (req, res) => {
+  try {
+    // Delete all files from filesystem
+    for (const pdf of pdfsDatabase) {
+      const filePath = path.join(uploadsDir, pdf.storedFilename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // Clear RAG service
+    try {
+      await fetch(`${RAG_SERVICE_URL}/clear-all`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Error clearing RAG service:', error.message);
+    }
+
+    // Clear database
+    const deletedCount = pdfsDatabase.length;
+    pdfsDatabase.length = 0;
+    saveDatabase();
+
+    res.json({ 
+      message: 'All PDFs deleted successfully',
+      deletedCount 
+    });
+  } catch (error) {
+    console.error('Error deleting all PDFs:', error);
+    res.status(500).json({ error: 'Error deleting all PDFs' });
+  }
 });
 
 // Chat History Routes
@@ -246,6 +366,121 @@ app.delete('/api/chats/:id', (req, res) => {
   saveChatsDatabase();
 
   res.json({ message: 'Chat deleted successfully' });
+});
+
+// RAG Query Routes
+
+// Query RAG service
+app.post('/api/rag/query', async (req, res) => {
+  try {
+    const { query, tags, pdf_ids, top_k = 5 } = req.body;
+    
+    if (!query) {
+      return res.status(400).json({ error: 'Query is required' });
+    }
+    
+    const response = await fetch(`${RAG_SERVICE_URL}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, tags, pdf_ids, top_k })
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+    
+    const results = await response.json();
+    res.json(results);
+  } catch (error) {
+    console.error('RAG query error:', error);
+    res.status(500).json({ error: 'Error querying RAG service: ' + error.message });
+  }
+});
+
+// Get RAG service status
+app.get('/api/rag/status', async (req, res) => {
+  try {
+    const response = await fetch(`${RAG_SERVICE_URL}/health`);
+    
+    if (!response.ok) {
+      throw new Error('RAG service not healthy');
+    }
+    
+    const status = await response.json();
+    res.json({ available: true, ...status });
+  } catch (error) {
+    res.json({ available: false, error: error.message });
+  }
+});
+
+// Get RAG tags
+app.get('/api/rag/tags', async (req, res) => {
+  try {
+    const response = await fetch(`${RAG_SERVICE_URL}/tags`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to get tags');
+    }
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error getting RAG tags:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get RAG stats
+app.get('/api/rag/stats', async (req, res) => {
+  try {
+    const response = await fetch(`${RAG_SERVICE_URL}/stats`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to get stats');
+    }
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error getting RAG stats:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Reprocess a PDF with RAG
+app.post('/api/rag/reprocess/:id', async (req, res) => {
+  try {
+    const pdfIndex = pdfsDatabase.findIndex(p => p.id === req.params.id);
+    
+    if (pdfIndex === -1) {
+      return res.status(404).json({ error: 'PDF not found' });
+    }
+    
+    const pdf = pdfsDatabase[pdfIndex];
+    
+    // Set status to processing
+    pdfsDatabase[pdfIndex].ragStatus = 'processing';
+    pdfsDatabase[pdfIndex].ragError = null;
+    saveDatabase();
+    
+    // Delete existing chunks first
+    try {
+      await fetch(`${RAG_SERVICE_URL}/document/${pdf.id}`, { method: 'DELETE' });
+    } catch (e) {
+      // Ignore delete errors
+    }
+    
+    // Reprocess asynchronously
+    processPdfWithRag(pdf).catch(err => {
+      console.error(`Error reprocessing PDF ${pdf.id}:`, err.message);
+    });
+    
+    res.json({ success: true, message: 'Reprocessing started' });
+  } catch (error) {
+    console.error('Error reprocessing PDF:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Error handling middleware

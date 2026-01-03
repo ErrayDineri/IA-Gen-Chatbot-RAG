@@ -6,18 +6,26 @@ import './Chatbot.css';
 function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! How can I help you with your PDF library today?", sender: 'bot' }
+    { id: 1, text: "Hello! How can I help you with your PDF library today? You can enable RAG mode to search through your documents.", sender: 'bot' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [size, setSize] = useState(() => {
     const saved = localStorage.getItem('chatbot-size');
-    return saved ? JSON.parse(saved) : { width: 380, height: 500 };
+    return saved ? JSON.parse(saved) : { width: 420, height: 550 };
   });
   const [isResizing, setIsResizing] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
+  
+  // RAG state
+  const [ragEnabled, setRagEnabled] = useState(false);
+  const [ragAvailable, setRagAvailable] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [showTagFilter, setShowTagFilter] = useState(false);
+  
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const resizeRef = useRef({ startX: 0, startY: 0, startWidth: 0, startHeight: 0 });
@@ -35,10 +43,48 @@ function Chatbot() {
     }
   };
 
-  // Load chat history on mount
+  // Check RAG service status and fetch tags
+  const checkRagStatus = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/rag/status');
+      if (response.ok) {
+        const data = await response.json();
+        setRagAvailable(data.available);
+        if (data.available && data.available_tags) {
+          setAvailableTags(data.available_tags);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking RAG status:', error);
+      setRagAvailable(false);
+    }
+  };
+
+  // Fetch available tags from RAG service
+  const fetchRagTags = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/rag/tags');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableTags(data.tags || []);
+      }
+    } catch (error) {
+      console.error('Error fetching RAG tags:', error);
+    }
+  };
+
+  // Load chat history and check RAG on mount
   useEffect(() => {
     fetchChatHistory();
+    checkRagStatus();
   }, []);
+
+  // Refresh tags when RAG is enabled
+  useEffect(() => {
+    if (ragEnabled) {
+      fetchRagTags();
+    }
+  }, [ragEnabled]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,9 +92,26 @@ function Chatbot() {
 
   const clearChat = () => {
     setMessages([
-      { id: 1, text: "Hello! How can I help you with your PDF library today?", sender: 'bot' }
+      { id: 1, text: "Hello! How can I help you with your PDF library today? You can enable RAG mode to search through your documents.", sender: 'bot' }
     ]);
     setCurrentChatId(null);
+  };
+
+  // Toggle tag selection
+  const toggleTag = (tag) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
+  // Toggle tag filter panel and refresh tags
+  const toggleTagFilter = () => {
+    if (!showTagFilter) {
+      fetchRagTags(); // Refresh tags when opening
+    }
+    setShowTagFilter(!showTagFilter);
   };
 
   // Save size preference
@@ -56,13 +119,77 @@ function Chatbot() {
     localStorage.setItem('chatbot-size', JSON.stringify(size));
   }, [size]);
 
+  // Generate a short chat name using AI
+  const generateChatName = async (messages) => {
+    if (!messages || messages.length <= 1) return 'New Chat';
+    
+    // Get conversation summary (first few exchanges)
+    const convSummary = messages
+      .filter(m => m.sender === 'user')
+      .slice(0, 2)
+      .map(m => m.text)
+      .join(' | ');
+    
+    if (!convSummary) return 'New Chat';
+    
+    try {
+      const response = await fetch('http://127.0.0.1:8000/chat/regular/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: `Give a 2-3 word title for this conversation. Reply with ONLY the title, nothing else. No quotes, no punctuation, no explanation.
+
+Conversation: "${convSummary}"`
+            }
+          ],
+          config: { temperature: 0.3, limit: 20 }
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed');
+      
+      // Read the stream to get the title
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let title = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line);
+            if (data.content) title += data.content;
+          } catch (e) {}
+        }
+      }
+      
+      // Clean up the title
+      title = title.trim().replace(/^["']|["']$/g, '').slice(0, 30);
+      return title || 'New Chat';
+      
+    } catch (error) {
+      console.error('Error generating chat name:', error);
+      // Fallback: use first few words of first message
+      const firstMsg = messages.find(m => m.sender === 'user')?.text || '';
+      return firstMsg.split(' ').slice(0, 3).join(' ').slice(0, 25) || 'New Chat';
+    }
+  };
+
   const saveCurrentChat = async () => {
     if (messages.length <= 1) return; // Don't save empty chats
     
-    const chatName = messages.find(m => m.sender === 'user')?.text.slice(0, 30) || 'New Chat';
+    const chatName = await generateChatName(messages);
     const chatData = {
       id: currentChatId || Date.now().toString(),
-      name: chatName + (chatName.length >= 30 ? '...' : ''),
+      name: chatName,
       messages: messages,
       date: new Date().toISOString()
     };
@@ -87,7 +214,7 @@ function Chatbot() {
   const loadChat = (chat) => {
     setMessages(chat.messages);
     setCurrentChatId(chat.id);
-    setShowHistory(false);
+    // Don't close history panel when loading a chat
   };
 
   const deleteChat = async (chatId, e) => {
@@ -108,10 +235,9 @@ function Chatbot() {
     }
   };
 
-  const newChat = () => {
-    saveCurrentChat();
+  const newChat = async () => {
+    await saveCurrentChat();
     clearChat();
-    setShowHistory(false);
   };
 
   useEffect(() => {
@@ -188,16 +314,64 @@ function Chatbot() {
     const botMessageId = Date.now() + 1;
 
     try {
+      let ragContext = '';
+      let sources = [];
+      
+      // If RAG is enabled, query for relevant context
+      if (ragEnabled && ragAvailable) {
+        try {
+          const ragResponse = await fetch('http://localhost:5000/api/rag/query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: userInput,
+              tags: selectedTags.length > 0 ? selectedTags : null,
+              top_k: 5
+            })
+          });
+          
+          if (ragResponse.ok) {
+            const ragData = await ragResponse.json();
+            if (ragData.results && ragData.results.length > 0) {
+              // Build context from retrieved chunks
+              ragContext = ragData.results.map((r, i) => 
+                `[Source ${i + 1}: ${r.metadata.filename}, Page ${r.metadata.page_num}]\n${r.text}`
+              ).join('\n\n---\n\n');
+              
+              sources = ragData.results.map(r => ({
+                filename: r.metadata.filename,
+                page: r.metadata.page_num,
+                similarity: r.similarity
+              }));
+            }
+          }
+        } catch (ragError) {
+          console.error('RAG query failed:', ragError);
+        }
+      }
+      
       // Build conversation history for context
       const conversationHistory = messages
-        .filter(msg => msg.text) // Only include messages with content
+        .filter(msg => msg.text && !msg.sources) // Exclude source metadata
         .map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'assistant',
           content: msg.text
         }));
       
-      // Add the current user message
-      conversationHistory.push({ role: 'user', content: userInput });
+      // Build the final user message with RAG context
+      let finalUserContent = userInput;
+      if (ragContext) {
+        finalUserContent = `Use the following context from the user's documents to answer their question. Respond in the SAME LANGUAGE as the user's question.
+
+CONTEXT:
+${ragContext}
+
+QUESTION: ${userInput}
+
+Instructions: Answer based on the context above. Cite sources (filename, page) when relevant. If the context doesn't help, say so briefly and give a general answer. Match the user's language.`;
+      }
+      
+      conversationHistory.push({ role: 'user', content: finalUserContent });
 
       const response = await fetch('http://127.0.0.1:8000/chat/regular/stream', {
         method: 'POST',
@@ -208,7 +382,7 @@ function Chatbot() {
           messages: conversationHistory,
           config: {
             temperature: 0.7,
-            limit: 1024
+            limit: 2048
           }
         })
       });
@@ -238,7 +412,12 @@ function Chatbot() {
               if (!messageCreated) {
                 // Create bot message on first content and hide typing indicator
                 setIsLoading(false);
-                setMessages(prev => [...prev, { id: botMessageId, text: fullText, sender: 'bot' }]);
+                setMessages(prev => [...prev, { 
+                  id: botMessageId, 
+                  text: fullText, 
+                  sender: 'bot',
+                  sources: sources.length > 0 ? sources : null
+                }]);
                 messageCreated = true;
               } else {
                 // Update existing bot message
@@ -328,10 +507,36 @@ function Chatbot() {
               </span>
               <div>
                 <h3>PDF Assistant</h3>
-                <span className="chatbot-status">Online</span>
+                <span className={`chatbot-status ${ragEnabled ? 'rag-active' : ''}`}>
+                  {ragEnabled ? 'RAG Active' : 'Online'}
+                </span>
               </div>
             </div>
             <div className="chatbot-header-actions">
+              <button 
+                className={`chatbot-rag-btn ${ragEnabled ? 'active' : ''} ${!ragAvailable ? 'disabled' : ''}`}
+                onClick={() => ragAvailable && setRagEnabled(!ragEnabled)}
+                title={ragAvailable ? (ragEnabled ? 'Disable RAG' : 'Enable RAG') : 'RAG service unavailable'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="M21 21l-4.35-4.35"/>
+                </svg>
+              </button>
+              {ragEnabled && (
+                <button 
+                  className={`chatbot-filter-btn ${showTagFilter ? 'active' : ''}`}
+                  onClick={() => setShowTagFilter(!showTagFilter)}
+                  title="Filter by tags"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                  </svg>
+                  {selectedTags.length > 0 && (
+                    <span className="filter-badge">{selectedTags.length}</span>
+                  )}
+                </button>
+              )}
               <button 
                 className="chatbot-history-btn" 
                 onClick={() => setShowHistory(!showHistory)}
@@ -372,39 +577,37 @@ function Chatbot() {
             </div>
           </div>
 
-          {showHistory && (
-            <div className="chat-history-panel">
-              <div className="chat-history-header">
-                <h4>Chat History</h4>
-                <span className="chat-count">{chatHistory.length} saved</span>
+          {/* Tag Filter Panel */}
+          {showTagFilter && ragEnabled && (
+            <div className="tag-filter-panel">
+              <div className="tag-filter-header">
+                <h4>Filter by Tags</h4>
+                {selectedTags.length > 0 && (
+                  <button 
+                    className="clear-tags-btn"
+                    onClick={() => setSelectedTags([])}
+                  >
+                    Clear all
+                  </button>
+                )}
               </div>
-              {chatHistory.length === 0 ? (
-                <p className="no-history">No saved chats yet</p>
+              {availableTags.length === 0 ? (
+                <p className="no-tags-message">No tags available. Upload PDFs with tags to filter.</p>
               ) : (
-                <div className="chat-history-list">
-                  {chatHistory.map(chat => (
-                    <div 
-                      key={chat.id} 
-                      className={`chat-history-item ${currentChatId === chat.id ? 'active' : ''}`}
-                      onClick={() => loadChat(chat)}
+                <div className="tag-filter-list">
+                  {availableTags.map(tag => (
+                    <button
+                      key={tag}
+                      className={`tag-filter-item ${selectedTags.includes(tag) ? 'selected' : ''}`}
+                      onClick={() => toggleTag(tag)}
                     >
-                      <div className="chat-history-info">
-                        <span className="chat-history-name">{chat.name}</span>
-                        <span className="chat-history-date">
-                          {new Date(chat.date).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <button 
-                        className="chat-history-delete"
-                        onClick={(e) => deleteChat(chat.id, e)}
-                        title="Delete chat"
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6"/>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      {tag}
+                      {selectedTags.includes(tag) && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                          <polyline points="20 6 9 17 4 12"/>
                         </svg>
-                      </button>
-                    </div>
+                      )}
+                    </button>
                   ))}
                 </div>
               )}
@@ -432,6 +635,27 @@ function Chatbot() {
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
                   ) : (
                     <p>{message.text}</p>
+                  )}
+                  {message.sources && message.sources.length > 0 && (
+                    <div className="rag-sources">
+                      <div className="sources-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                          <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <span>Sources ({message.sources.length})</span>
+                      </div>
+                      <div className="sources-list">
+                        {message.sources.map((source, idx) => (
+                          <div key={idx} className="source-item">
+                            <span className="source-filename">{source.filename}</span>
+                            {source.page && <span className="source-page">Page {source.page}</span>}
+                            {source.tags && <span className="source-tags">{source.tags}</span>}
+                            <span className="source-similarity">{Math.round(source.similarity * 100)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -479,6 +703,55 @@ function Chatbot() {
               </svg>
             </button>
           </form>
+        </div>
+      )}
+
+      {/* Chat History Sidebar - appears to the left of chat */}
+      {isOpen && showHistory && (
+        <div className="chat-history-sidebar">
+          <div className="chat-history-header">
+            <h4>Chat History</h4>
+            <button 
+              className="close-history-btn"
+              onClick={() => setShowHistory(false)}
+              title="Close"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          {chatHistory.length === 0 ? (
+            <p className="no-history">No saved chats yet</p>
+          ) : (
+            <div className="chat-history-list">
+              {chatHistory.map(chat => (
+                <div 
+                  key={chat.id} 
+                  className={`chat-history-item ${currentChatId === chat.id ? 'active' : ''}`}
+                  onClick={() => loadChat(chat)}
+                >
+                  <div className="chat-history-info">
+                    <span className="chat-history-name">{chat.name}</span>
+                    <span className="chat-history-date">
+                      {new Date(chat.date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <button 
+                    className="chat-history-delete"
+                    onClick={(e) => deleteChat(chat.id, e)}
+                    title="Delete chat"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
