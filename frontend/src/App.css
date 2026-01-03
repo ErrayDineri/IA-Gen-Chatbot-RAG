@@ -1,0 +1,44 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-header {
+  text-align: center;
+  color: white;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.App-header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.main-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 20px;
+  padding: 20px;
+  max-height: calc(100vh - 70px);
+  overflow: hidden;
+}
+
+.sidebar {
+  overflow-y: auto;
+}
+
+.content {
+  overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+    max-height: none;
+    overflow: visible;
+  }
+}

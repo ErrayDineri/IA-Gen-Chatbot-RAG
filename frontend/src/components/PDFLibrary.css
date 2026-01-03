@@ -1,0 +1,333 @@
+.library-container {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.library-header h2 {
+  color: #333;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.tag-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tag-filter label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.tag-select {
+  padding: 8px 12px;
+  border: 2px solid #B8D8D8;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.tag-select:focus {
+  outline: none;
+  border-color: #7A9E9F;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.empty-state p {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  color: #bbb;
+}
+
+.pdf-table-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.pdf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.pdf-table thead {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 1;
+}
+
+.pdf-table th {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 2px solid #B8D8D8;
+  color: #555;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pdf-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.pdf-row:hover {
+  background: #f8fbfb;
+}
+
+.col-name {
+  min-width: 200px;
+}
+
+.col-size {
+  width: 80px;
+  text-align: right;
+  color: #666;
+}
+
+.col-date {
+  width: 100px;
+  color: #666;
+}
+
+.col-tags {
+  min-width: 150px;
+}
+
+.col-actions {
+  width: 80px;
+  text-align: center;
+}
+
+.pdf-icon {
+  margin-right: 8px;
+  font-size: 1.1rem;
+}
+
+.pdf-filename {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.tag {
+  background: linear-gradient(135deg, #A27E8E 0%, #7A9E9F 100%);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.no-tags {
+  color: #ccc;
+  font-style: italic;
+}
+
+.edit-tags-btn {
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.edit-tags-btn:hover {
+  opacity: 1;
+}
+
+.tags-edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tags-edit-input {
+  padding: 4px 8px;
+  border: 2px solid #7A9E9F;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  width: 120px;
+}
+
+.tags-edit-input:focus {
+  outline: none;
+  border-color: #A27E8E;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #45a049;
+}
+
+.cancel-btn {
+  background: #f44336;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #da190b;
+}
+
+.view-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.view-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Scrollbar styling */
+.pdf-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.pdf-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.pdf-table-container::-webkit-scrollbar-thumb {
+  background: #B8D8D8;
+  border-radius: 10px;
+}
+
+.pdf-table-container::-webkit-scrollbar-thumb:hover {
+  background: #7A9E9F;
+}
+
+.tags-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn,
+.cancel-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #45a049;
+}
+
+.cancel-btn {
+  background: #f44336;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #da190b;
+}
+
+.view-btn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: linear-gradient(135deg, #A27E8E 0%, #7A9E9F 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.view-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(162, 126, 142, 0.4);
+}
