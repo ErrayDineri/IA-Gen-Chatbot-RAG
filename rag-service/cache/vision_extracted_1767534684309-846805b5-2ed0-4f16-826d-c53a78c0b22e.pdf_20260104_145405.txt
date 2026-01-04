@@ -1,0 +1,141 @@
+=== VISION-EXTRACTED TEXT DEBUG ===
+Filename: 1767534684309-846805b5-2ed0-4f16-826d-c53a78c0b22e.pdf
+Extracted at: 2026-01-04T14:54:05.708254
+Total pages: 3
+Metadata: {
+  "title": "PV 24-12-2025.pptx",
+  "author": "",
+  "subject": "",
+  "creator": "Google",
+  "creation_date": ""
+}
+
+================================================================================
+FULL TEXT (as sent to chunker):
+================================================================================
+Sesame Junior Entreprise.
+Process RH
+Procès-Verbal de Réunion
+Date: 24/12/2025
+Page: 1/3
+
+SESAME Junior Entreprise
+Date :24-12-2025
+Heure : 17h
+Lieu : en ligne (google meet)
+Objet de la réunion :Prospection de projets.
+
+nom et prénom     présent     absent
+Ghozlen harradi    X
+Ilef Kefi          X
+Nour Maalej       X
+Emma ettahar      X
+Fatma Zahra Laarif  X
+
+Ordre du jour :
+I. Ouverture de la séance
+II. Organisation et prospection des projets
+III. Types de projets à cibler
+IV. Méthodes et outils de prospection
+V. Décisions prises
+VI. Clôture de la séance
+
+Date:24/12/2025
+Page: 2/5
+
+Process RH
+Procès-Verbal de Réunion
+
+I. Ouverture de la séance
+Le responsable ouvre la séance et rappelle l'objectif principal de la réunion, qui porte sur la prospection de projets et l'organisation du travail entre les pôles concernés.
+
+II. Organisation et prospection des projets
+Discussion autour de l'organisation interne du pôle Project Management et de la collaboration avec le pôle Marketing & Communication pour la prospection de projets. Mise en place d'un nouveau groupe de travail dédié à la recherche de projets.
+
+III. Types de projets à cibler
+Échange sur les types de projets à proposer aux clients potentiels, notamment les auto-écoles, restaurants, cafés, plateformes e-commerce..
+
+IV. Méthodes et outils de prospection
+Présentation des techniques de prospection à adopter et explication de la manière de prospecter et de remplir le sheet de prospection afin d'assurer un suivi efficace des contacts.
+
+V. Décisions prises
+Fixation de l'objectif d'obtenir au minimum un projet à court terme et répartition des tâches entre les membres pour assurer le suivi de la prospection.
+
+VI.Clôture de la séance :
+Heure de fin: 17h25
+
+Date: 24/12/2025
+Page: 3/3
+
+Process RH
+Historique
+
+Version Date Objet Rédaction Vérification Validation
+1 24/12/2025 Procès-Ve rbal Fatma Zahra Laarif
+
+================================================================================
+PAGE-BY-PAGE TEXT:
+================================================================================
+
+--- PAGE 1 ---
+Sesame Junior Entreprise.
+Process RH
+Procès-Verbal de Réunion
+Date: 24/12/2025
+Page: 1/3
+
+SESAME Junior Entreprise
+Date :24-12-2025
+Heure : 17h
+Lieu : en ligne (google meet)
+Objet de la réunion :Prospection de projets.
+
+nom et prénom     présent     absent
+Ghozlen harradi    X
+Ilef Kefi          X
+Nour Maalej       X
+Emma ettahar      X
+Fatma Zahra Laarif  X
+
+Ordre du jour :
+I. Ouverture de la séance
+II. Organisation et prospection des projets
+III. Types de projets à cibler
+IV. Méthodes et outils de prospection
+V. Décisions prises
+VI. Clôture de la séance
+
+--- PAGE 2 ---
+Date:24/12/2025
+Page: 2/5
+
+Process RH
+Procès-Verbal de Réunion
+
+I. Ouverture de la séance
+Le responsable ouvre la séance et rappelle l'objectif principal de la réunion, qui porte sur la prospection de projets et l'organisation du travail entre les pôles concernés.
+
+II. Organisation et prospection des projets
+Discussion autour de l'organisation interne du pôle Project Management et de la collaboration avec le pôle Marketing & Communication pour la prospection de projets. Mise en place d'un nouveau groupe de travail dédié à la recherche de projets.
+
+III. Types de projets à cibler
+Échange sur les types de projets à proposer aux clients potentiels, notamment les auto-écoles, restaurants, cafés, plateformes e-commerce..
+
+IV. Méthodes et outils de prospection
+Présentation des techniques de prospection à adopter et explication de la manière de prospecter et de remplir le sheet de prospection afin d'assurer un suivi efficace des contacts.
+
+V. Décisions prises
+Fixation de l'objectif d'obtenir au minimum un projet à court terme et répartition des tâches entre les membres pour assurer le suivi de la prospection.
+
+VI.Clôture de la séance :
+Heure de fin: 17h25
+
+--- PAGE 3 ---
+Date: 24/12/2025
+Page: 3/3
+
+Process RH
+Historique
+
+Version Date Objet Rédaction Vérification Validation
+1 24/12/2025 Procès-Ve rbal Fatma Zahra Laarif
