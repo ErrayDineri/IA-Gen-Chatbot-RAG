@@ -120,6 +120,27 @@ app.post('/api/upload', upload.array('pdfs', 20), (req, res) => {
     }
 
     const tags = req.body.tags ? req.body.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+    
+    // Processing options - parse from JSON string sent by frontend
+    let processingOptions = {
+      extractor_mode: null,
+      chunker_mode: null,
+      merge_window: null
+    };
+    
+    if (req.body.processingOptions) {
+      try {
+        const parsed = JSON.parse(req.body.processingOptions);
+        processingOptions = {
+          extractor_mode: parsed.extractor_mode || null,
+          chunker_mode: parsed.chunker_mode || null,
+          merge_window: parsed.merge_window !== undefined ? parsed.merge_window : null
+        };
+        console.log('[Upload] Processing options:', processingOptions);
+      } catch (e) {
+        console.warn('[Upload] Failed to parse processingOptions:', e.message);
+      }
+    }
 
     const uploadedPdfs = req.files.map(file => {
       // Decode UTF-8 filename properly
@@ -142,12 +163,9 @@ app.post('/api/upload', upload.array('pdfs', 20), (req, res) => {
 
     saveDatabase();
 
-    // Process PDFs with RAG service (async, don't wait)
-    uploadedPdfs.forEach(pdf => {
-      processPdfWithRag(pdf).catch(err => {
-        console.error(`Error processing PDF ${pdf.id} with RAG:`, err.message);
-        // Status already updated in processPdfWithRag catch block
-      });
+    // Process PDFs with RAG service using batch processing
+    processPdfsWithRagBatch(uploadedPdfs, processingOptions).catch(err => {
+      console.error('Error in batch RAG processing:', err.message);
     });
 
     res.status(201).json({
@@ -160,8 +178,88 @@ app.post('/api/upload', upload.array('pdfs', 20), (req, res) => {
   }
 });
 
-// Process PDF with RAG service
-async function processPdfWithRag(pdf) {
+// Process multiple PDFs with RAG service in batch (efficient model loading)
+async function processPdfsWithRagBatch(pdfs, processingOptions = {}) {
+  if (!pdfs || pdfs.length === 0) return;
+  
+  // For single PDF, use the simpler path-based endpoint
+  if (pdfs.length === 1) {
+    return processPdfWithRag(pdfs[0], processingOptions);
+  }
+  
+  console.log(`[Batch] Processing ${pdfs.length} PDFs with RAG service...`);
+  
+  try {
+    // Build items array with file paths
+    const items = pdfs.map(pdf => ({
+      pdf_id: pdf.id,
+      filename: pdf.filename,
+      file_path: path.join(uploadsDir, pdf.storedFilename),
+      tags: pdf.tags
+    }));
+    
+    // Build request body with global processing options
+    const requestBody = { 
+      items,
+      // Include processing options if provided
+      ...(processingOptions.extractor_mode && { extractor_mode: processingOptions.extractor_mode }),
+      ...(processingOptions.chunker_mode && { chunker_mode: processingOptions.chunker_mode }),
+      ...(processingOptions.merge_window !== null && processingOptions.merge_window !== undefined && { merge_window: processingOptions.merge_window })
+    };
+    
+    // Call batch endpoint with JSON body
+    const response = await fetch(`${RAG_SERVICE_URL}/process-batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`RAG batch service error: ${error}`);
+    }
+    
+    const result = await response.json();
+    console.log(`[Batch] Complete: ${result.processed} processed, ${result.failed} failed`);
+    
+    // Update each PDF with its result
+    for (const item of result.results) {
+      const pdfIndex = pdfsDatabase.findIndex(p => p.id === item.pdf_id);
+      if (pdfIndex !== -1) {
+        if (item.success) {
+          pdfsDatabase[pdfIndex].ragStatus = 'success';
+          pdfsDatabase[pdfIndex].ragError = null;
+          pdfsDatabase[pdfIndex].chunksCount = item.chunks_created;
+        } else {
+          pdfsDatabase[pdfIndex].ragStatus = 'failed';
+          pdfsDatabase[pdfIndex].ragError = item.error;
+        }
+      }
+    }
+    saveDatabase();
+    
+    return result;
+  } catch (error) {
+    console.error(`[Batch] RAG processing failed:`, error.message);
+    
+    // Mark all PDFs as failed
+    for (const pdf of pdfs) {
+      const pdfIndex = pdfsDatabase.findIndex(p => p.id === pdf.id);
+      if (pdfIndex !== -1) {
+        pdfsDatabase[pdfIndex].ragStatus = 'failed';
+        pdfsDatabase[pdfIndex].ragError = error.message;
+      }
+    }
+    saveDatabase();
+    
+    throw error;
+  }
+}
+
+// Process PDF with RAG service (single file)
+async function processPdfWithRag(pdf, processingOptions = {}) {
   try {
     const filePath = path.join(uploadsDir, pdf.storedFilename);
     
@@ -175,7 +273,11 @@ async function processPdfWithRag(pdf) {
         pdf_id: pdf.id,
         filename: pdf.filename,
         tags: pdf.tags,
-        file_path: filePath
+        file_path: filePath,
+        // Include processing options if provided
+        ...(processingOptions.extractor_mode && { extractor_mode: processingOptions.extractor_mode }),
+        ...(processingOptions.chunker_mode && { chunker_mode: processingOptions.chunker_mode }),
+        ...(processingOptions.merge_window !== null && processingOptions.merge_window !== undefined && { merge_window: processingOptions.merge_window })
       })
     });
     
@@ -211,6 +313,32 @@ async function processPdfWithRag(pdf) {
     throw error;
   }
 }
+
+// Get RAG processing configuration options
+app.get('/api/rag/config', async (req, res) => {
+  try {
+    const response = await fetch(`${RAG_SERVICE_URL}/config`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch RAG config');
+    }
+    const config = await response.json();
+    res.json(config);
+  } catch (error) {
+    // Return sensible defaults if RAG service is unavailable
+    res.json({
+      defaults: {
+        extractor_mode: 'text',
+        chunker_mode: 'agentic',
+        merge_window: 3
+      },
+      options: {
+        extractor_modes: ['text', 'vision'],
+        chunker_modes: ['semantic', 'agentic'],
+        merge_window_range: [0, 5]
+      }
+    });
+  }
+});
 
 // Update PDF tags
 app.put('/api/pdfs/:id/tags', async (req, res) => {
@@ -471,17 +599,90 @@ app.post('/api/rag/reprocess/:id', async (req, res) => {
       // Ignore delete errors
     }
     
-    // Reprocess asynchronously
-    processPdfWithRag(pdf).catch(err => {
-      console.error(`Error reprocessing PDF ${pdf.id}:`, err.message);
-    });
+    // Parse processing options from request body
+    let processingOptions = {};
+    let rechunkOnly = false;
+    if (req.body) {
+      if (req.body.processingOptions) {
+        try {
+          processingOptions = typeof req.body.processingOptions === 'string' 
+            ? JSON.parse(req.body.processingOptions) 
+            : req.body.processingOptions;
+          console.log('[Reprocess] Processing options:', processingOptions);
+          // Extract rechunkOnly from processingOptions
+          rechunkOnly = processingOptions.rechunkOnly === true;
+        } catch (e) {
+          console.warn('[Reprocess] Failed to parse processingOptions:', e.message);
+        }
+      }
+    }
     
-    res.json({ success: true, message: 'Reprocessing started' });
+    if (rechunkOnly) {
+      // Rechunk only - use cached extraction
+      console.log(`[Reprocess] Rechunk only mode for ${pdf.id}`);
+      rechunkPdf(pdf.id, processingOptions).catch(err => {
+        console.error(`Error rechunking PDF ${pdf.id}:`, err.message);
+      });
+    } else {
+      // Full reprocess
+      processPdfWithRag(pdf, processingOptions).catch(err => {
+        console.error(`Error reprocessing PDF ${pdf.id}:`, err.message);
+      });
+    }
+    
+    res.json({ success: true, message: rechunkOnly ? 'Rechunking started' : 'Reprocessing started' });
   } catch (error) {
     console.error('Error reprocessing PDF:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// Rechunk PDF using cached extraction
+async function rechunkPdf(pdfId, processingOptions = {}) {
+  try {
+    const response = await fetch(`${RAG_SERVICE_URL}/rechunk/${pdfId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pdf_id: pdfId,
+        chunker_mode: processingOptions.chunker_mode || null,
+        merge_window: processingOptions.merge_window !== undefined ? processingOptions.merge_window : null
+      })
+    });
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`RAG service error: ${error}`);
+    }
+    
+    const result = await response.json();
+    console.log(`Rechunked ${pdfId}: ${result.chunks_created} chunks`);
+    
+    // Update PDF with new chunk count
+    const pdfIndex = pdfsDatabase.findIndex(p => p.id === pdfId);
+    if (pdfIndex !== -1) {
+      pdfsDatabase[pdfIndex].ragStatus = 'success';
+      pdfsDatabase[pdfIndex].ragError = null;
+      pdfsDatabase[pdfIndex].chunksCount = result.chunks_created;
+      saveDatabase();
+    }
+    
+    return result;
+  } catch (error) {
+    console.error(`Error rechunking PDF ${pdfId}:`, error.message);
+    
+    const pdfIndex = pdfsDatabase.findIndex(p => p.id === pdfId);
+    if (pdfIndex !== -1) {
+      pdfsDatabase[pdfIndex].ragStatus = 'failed';
+      pdfsDatabase[pdfIndex].ragError = error.message;
+      saveDatabase();
+    }
+    
+    throw error;
+  }
+}
 
 // Error handling middleware
 app.use((error, req, res, next) => {

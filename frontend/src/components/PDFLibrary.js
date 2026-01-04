@@ -1,10 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import axios from 'axios';
 import './PDFLibrary.css';
 
 function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
   const [editingId, setEditingId] = useState(null);
   const [editTags, setEditTags] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
+  const [chunksModal, setChunksModal] = useState({ open: false, pdf: null, chunks: [], loading: false, error: null });
+  
+  // Processing options for reprocess
+  const [reprocessModal, setReprocessModal] = useState({ open: false, pdfId: null });
+  const [config, setConfig] = useState({
+    defaults: { extractor_mode: 'text', chunker_mode: 'agentic', merge_window: 3 },
+    options: { extractor_modes: ['text', 'vision'], chunker_modes: ['semantic', 'agentic'], merge_window_range: [0, 5] }
+  });
+  const [reprocessOptions, setReprocessOptions] = useState({});
+  
+  // Fetch config on mount
+  useEffect(() => {
+    axios.get('/api/rag/config')
+      .then(res => setConfig(res.data))
+      .catch(() => {});
+  }, []);
 
   // Get all unique tags
   const allTags = useMemo(() => {
@@ -39,6 +56,21 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
     setEditTags('');
   };
 
+  const handleViewChunks = async (pdf) => {
+    setChunksModal({ open: true, pdf, chunks: [], loading: true, error: null });
+    try {
+      const response = await axios.get(`http://localhost:8001/chunks/${pdf.id}`);
+      setChunksModal(prev => ({ ...prev, chunks: response.data.chunks || [], loading: false }));
+    } catch (error) {
+      console.error('Error fetching chunks:', error);
+      setChunksModal(prev => ({ ...prev, loading: false, error: 'Failed to load chunks. Is the RAG service running?' }));
+    }
+  };
+
+  const closeChunksModal = () => {
+    setChunksModal({ open: false, pdf: null, chunks: [], loading: false, error: null });
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -52,6 +84,36 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  };
+
+  const openReprocessModal = async (pdfId) => {
+    // Check if cache exists for rechunk-only option
+    let hasCache = false;
+    try {
+      const res = await axios.get(`http://localhost:8001/cache/${pdfId}`);
+      hasCache = res.data.has_cache;
+    } catch (e) {
+      // RAG service unavailable, assume no cache
+    }
+    
+    setReprocessOptions({
+      extractor_mode: config.defaults.extractor_mode,
+      chunker_mode: config.defaults.chunker_mode,
+      merge_window: config.defaults.merge_window,
+      rechunkOnly: false
+    });
+    setReprocessModal({ open: true, pdfId, hasCache });
+  };
+
+  const closeReprocessModal = () => {
+    setReprocessModal({ open: false, pdfId: null, hasCache: false });
+  };
+
+  const handleReprocess = () => {
+    if (reprocessModal.pdfId && onRetryRag) {
+      onRetryRag(reprocessModal.pdfId, reprocessOptions);
+      closeReprocessModal();
+    }
   };
 
   return (
@@ -190,6 +252,28 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
                             <polyline points="20 6 9 17 4 12"/>
                           </svg>
                           <span>{pdf.chunksCount || 0} chunks</span>
+                          <button 
+                            className="view-chunks-btn"
+                            onClick={() => handleViewChunks(pdf)}
+                            title="View chunks"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="3" width="7" height="7"/>
+                              <rect x="14" y="3" width="7" height="7"/>
+                              <rect x="14" y="14" width="7" height="7"/>
+                              <rect x="3" y="14" width="7" height="7"/>
+                            </svg>
+                          </button>
+                          <button
+                            className="reprocess-rag-btn"
+                            onClick={() => openReprocessModal(pdf.id)}
+                            title="Reprocess with different options"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="23 4 23 10 17 10"/>
+                              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                          </button>
                         </>
                       )}
                       {pdf.ragStatus === 'failed' && (
@@ -202,7 +286,7 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
                           <span>Failed</span>
                           <button 
                             className="retry-rag-btn"
-                            onClick={() => onRetryRag && onRetryRag(pdf.id)}
+                            onClick={() => openReprocessModal(pdf.id)}
                             title="Retry RAG processing"
                           >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -219,17 +303,19 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
                         </>
                       )}
                       {!pdf.ragStatus && !pdf.ragProcessed && (
-                        <button 
-                          className="process-rag-btn"
-                          onClick={() => onRetryRag && onRetryRag(pdf.id)}
-                          title="Process with RAG"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polygon points="10 8 16 12 10 16 10 8"/>
-                          </svg>
-                          <span>Process</span>
-                        </button>
+                        <>
+                          <button 
+                            className="process-rag-btn"
+                            onClick={() => openReprocessModal(pdf.id)}
+                            title="Process with RAG"
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polygon points="10 8 16 12 10 16 10 8"/>
+                            </svg>
+                            <span>Process</span>
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>
@@ -265,6 +351,167 @@ function PDFLibrary({ pdfs, onTagUpdate, onDelete, onDeleteAll, onRetryRag }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Chunks Modal */}
+      {chunksModal.open && (
+        <div className="chunks-modal-overlay" onClick={closeChunksModal}>
+          <div className="chunks-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="chunks-modal-header">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Chunks: {chunksModal.pdf?.filename}
+              </h3>
+              <button className="chunks-modal-close" onClick={closeChunksModal}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="chunks-modal-body">
+              {chunksModal.loading && (
+                <div className="chunks-loading">
+                  <span className="rag-spinner"></span>
+                  <span>Loading chunks...</span>
+                </div>
+              )}
+              {chunksModal.error && (
+                <div className="chunks-error">{chunksModal.error}</div>
+              )}
+              {!chunksModal.loading && !chunksModal.error && chunksModal.chunks.length === 0 && (
+                <div className="chunks-empty">No chunks found for this document.</div>
+              )}
+              {!chunksModal.loading && chunksModal.chunks.length > 0 && (
+                <div className="chunks-list">
+                  <div className="chunks-summary">
+                    Total: {chunksModal.chunks.length} chunks
+                  </div>
+                  {chunksModal.chunks.map((chunk, index) => (
+                    <div key={chunk.id} className="chunk-item">
+                      <div className="chunk-header">
+                        <span className="chunk-index">
+                          #{index + 1}
+                          {chunk.metadata?.chunk_title && (
+                            <span className="chunk-title"> — {chunk.metadata.chunk_title}</span>
+                          )}
+                        </span>
+                        <span className="chunk-meta">
+                          Page {chunk.metadata?.page_num || '?'} • {chunk.metadata?.char_count || chunk.text?.length || 0} chars
+                          {chunk.metadata?.chunking_method && (
+                            <span className="chunk-method"> • {chunk.metadata.chunking_method}</span>
+                          )}
+                        </span>
+                      </div>
+                      <pre className="chunk-text">{chunk.text}</pre>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reprocess Modal */}
+      {reprocessModal.open && (
+        <div className="modal-overlay" onClick={closeReprocessModal}>
+          <div className="modal-content reprocess-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Processing Options</h3>
+              <button className="modal-close" onClick={closeReprocessModal}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              {/* Rechunk Only Option */}
+              {reprocessModal.hasCache && (
+                <div className="reprocess-option rechunk-option">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={reprocessOptions.rechunkOnly || false}
+                      onChange={(e) => setReprocessOptions(prev => ({ ...prev, rechunkOnly: e.target.checked }))}
+                    />
+                    <span className="checkbox-text">
+                      <span className="option-label">Rechunk only</span>
+                      <span className="option-hint">Skip extraction, use cached text (faster)</span>
+                    </span>
+                  </label>
+                </div>
+              )}
+              
+              {/* Extractor - disabled when rechunk only */}
+              <div className={`reprocess-option ${reprocessOptions.rechunkOnly ? 'disabled' : ''}`}>
+                <label>
+                  <span className="option-label">Extractor</span>
+                  <span className="option-hint">text=fast, vision=OCR</span>
+                </label>
+                <select
+                  value={reprocessOptions.extractor_mode || config.defaults.extractor_mode}
+                  onChange={(e) => setReprocessOptions(prev => ({ ...prev, extractor_mode: e.target.value }))}
+                  disabled={reprocessOptions.rechunkOnly}
+                >
+                  {config.options.extractor_modes.map(mode => (
+                    <option key={mode} value={mode}>
+                      {mode}{mode === config.defaults.extractor_mode ? ' (default)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="reprocess-option">
+                <label>
+                  <span className="option-label">Chunker</span>
+                  <span className="option-hint">semantic=embedding, agentic=LLM</span>
+                </label>
+                <select
+                  value={reprocessOptions.chunker_mode || config.defaults.chunker_mode}
+                  onChange={(e) => setReprocessOptions(prev => ({ ...prev, chunker_mode: e.target.value }))}
+                >
+                  {config.options.chunker_modes.map(mode => (
+                    <option key={mode} value={mode}>
+                      {mode}{mode === config.defaults.chunker_mode ? ' (default)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="reprocess-option">
+                <label>
+                  <span className="option-label">Merge Window</span>
+                  <span className="option-hint">0=none, N=N neighbors each side</span>
+                </label>
+                <div className="slider-row">
+                  <input
+                    type="range"
+                    min={config.options.merge_window_range[0]}
+                    max={config.options.merge_window_range[1]}
+                    value={reprocessOptions.merge_window !== undefined ? reprocessOptions.merge_window : config.defaults.merge_window}
+                    onChange={(e) => setReprocessOptions(prev => ({ ...prev, merge_window: parseInt(e.target.value) }))}
+                  />
+                  <span className="slider-value">
+                    {reprocessOptions.merge_window !== undefined ? reprocessOptions.merge_window : config.defaults.merge_window}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={closeReprocessModal}>Cancel</button>
+              <button className="process-btn" onClick={handleReprocess}>
+                {reprocessOptions.rechunkOnly ? 'Rechunk' : 'Process'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

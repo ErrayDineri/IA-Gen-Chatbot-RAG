@@ -79,7 +79,9 @@ class VectorStore:
         metadatas = []
         
         for i, chunk in enumerate(chunks):
-            chunk_id = f"{pdf_id}_chunk_{i}"
+            chunk_metadata = chunk.get("metadata") or {}
+            global_chunk_index = chunk_metadata.get("global_chunk_index", i)
+            chunk_id = f"{pdf_id}_chunk_{global_chunk_index}"
             
             # Build metadata (ChromaDB requires flat structure)
             # Store tags as comma-separated string for display
@@ -89,10 +91,25 @@ class VectorStore:
                 "pdf_id": pdf_id,
                 "filename": filename,
                 "tags": tags_str,  # For display purposes
-                "chunk_index": chunk["metadata"].get("chunk_index", i),
-                "page_num": chunk["metadata"].get("page_num", 0),
-                "char_count": chunk["metadata"].get("char_count", len(chunk["text"]))
+                "chunk_index": chunk_metadata.get("chunk_index", i),
+                "global_chunk_index": global_chunk_index,
+                "page_num": chunk_metadata.get("page_num", 0),
+                "char_count": chunk_metadata.get("char_count", len(chunk["text"]))
             }
+
+            # Preserve optional chunker metadata (useful for debugging & UI)
+            chunking_method = chunk_metadata.get("chunking_method")
+            if chunking_method:
+                metadata["chunking_method"] = chunking_method
+
+            chunk_title = chunk_metadata.get("chunk_title")
+            if chunk_title:
+                metadata["chunk_title"] = chunk_title
+
+            # Keep chunk_total if present (not required, but helpful)
+            chunk_total = chunk_metadata.get("chunk_total")
+            if chunk_total is not None:
+                metadata["chunk_total"] = chunk_total
             # Add each tag as a separate boolean field for filtering
             for tag in tags:
                 # Sanitize tag name for metadata key (replace spaces/special chars)
@@ -325,6 +342,89 @@ class VectorStore:
             return sorted(list(pdf_ids))
         except Exception as e:
             print(f"Error getting PDF IDs: {e}")
+            return []
+    
+    def get_chunks_by_pdf_id(self, pdf_id: str, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+        """
+        Get all chunks for a specific PDF document.
+        
+        Args:
+            pdf_id: The PDF identifier
+            limit: Maximum number of chunks to return
+            offset: Number of chunks to skip
+            
+        Returns:
+            List of chunk dictionaries with id, text, and metadata
+        """
+        try:
+            results = self.collection.get(
+                where={"pdf_id": pdf_id},
+                include=["documents", "metadatas"],
+                limit=limit,
+                offset=offset
+            )
+            
+            chunks = []
+            if results and results["ids"]:
+                for i, chunk_id in enumerate(results["ids"]):
+                    chunks.append({
+                        "id": chunk_id,
+                        "text": results["documents"][i] if results["documents"] else "",
+                        "metadata": results["metadatas"][i] if results["metadatas"] else {},
+                        "text_preview": (results["documents"][i][:200] + "...") if results["documents"] and len(results["documents"][i]) > 200 else results["documents"][i] if results["documents"] else ""
+                    })
+            
+            # Sort by stable document order
+            # Prefer global_chunk_index (assigned across all pages), else fallback to (page_num, chunk_index).
+            def _sort_key(item: Dict[str, Any]):
+                metadata = item.get("metadata") or {}
+                if "global_chunk_index" in metadata:
+                    return (0, int(metadata.get("global_chunk_index") or 0), 0, 0)
+                return (
+                    1,
+                    int(metadata.get("page_num") or 0),
+                    int(metadata.get("chunk_index") or 0),
+                    0,
+                )
+
+            chunks.sort(key=_sort_key)
+            return chunks
+        except Exception as e:
+            print(f"Error getting chunks for PDF {pdf_id}: {e}")
+            return []
+    
+    def get_all_chunks(self, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
+        """
+        Get all chunks in the store (paginated).
+        
+        Args:
+            limit: Maximum number of chunks to return
+            offset: Number of chunks to skip
+            
+        Returns:
+            List of chunk dictionaries with id, text preview, and metadata
+        """
+        try:
+            results = self.collection.get(
+                include=["documents", "metadatas"],
+                limit=limit,
+                offset=offset
+            )
+            
+            chunks = []
+            if results and results["ids"]:
+                for i, chunk_id in enumerate(results["ids"]):
+                    text = results["documents"][i] if results["documents"] else ""
+                    chunks.append({
+                        "id": chunk_id,
+                        "text_preview": (text[:200] + "...") if len(text) > 200 else text,
+                        "text_length": len(text),
+                        "metadata": results["metadatas"][i] if results["metadatas"] else {}
+                    })
+            
+            return chunks
+        except Exception as e:
+            print(f"Error getting all chunks: {e}")
             return []
 
 

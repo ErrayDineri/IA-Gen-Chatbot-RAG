@@ -1,0 +1,99 @@
+=== VISION-EXTRACTED TEXT DEBUG ===
+Filename: 1767420992329-82b14f14-ef81-43a1-adbc-87ec61acdf79.pdf
+Extracted at: 2026-01-03T07:19:18.681811
+Total pages: 1
+Metadata: {
+  "title": "1767420992329-82b14f14-ef81-43a1-adbc-87ec61acdf79.pdf",
+  "author": "",
+  "subject": "",
+  "creator": "",
+  "creation_date": ""
+}
+
+================================================================================
+FULL TEXT (as sent to chunker):
+================================================================================
+RÉPUBLIQUE FRANÇAISE
+Liberté Égalité Fraternité
+FRANCE EDUCATION INTERNATIONAL DELF DOLF
+Attestation de Réussite
+Je soussigné-e SCHENKER Jean-Charles
+Président-e du jury au centre d'examen de: 216021 - Tunis - AF (TUNISIE)
+atteste que :
+GUERMAZI Rayen
+date et lieu de naissance : 17/08/2003 à Tunis (TUNISIE)
+numéro de candidat-e: 216013216522
+a présenté avec succès les épreuves de l'examen :
+DALF C1
+Niveau C1 du Cadre européen commun de référence pour les langues
+Session : 202507T à Alliance française de Tunis
+Détail des notes aux différentes épreuves
+Compréhension de l'oral note : 22.0 / 25
+Compréhension des écrits note : 22.5 / 25
+Production écrite note : 21.0 / 25
+Production orale note : 25.0 / 25
+Note finale : 90.5 / 100
+Fait le 29 août 2025
+Alliance française Tunisie
+TUNISIE
+Le DELF et le DALF comportent 7 diplômes
+indépendants :
+DELF A1.1 DELF A1 DELF A2
+DELF B1 DELF B2
+DALF C1 DALF C2
+Le présent document atteste de la réussite au diplôme
+correspondant, en l'attente de la délivrance du
+diplôme définitif.
+Important : cette attestation comporte votre numéro
+d'identification DELF-DALF. Ce numéro est définitif.
+Vous devez le communiquer à chacune de vos
+inscriptions, dans le même centre d'examen ou dans
+un centre différent.
+Cette attestation est délivrée en un seul exemplaire.
+Aucun double ne pourra être établi. Ne vous en
+dessaississez jamais.
+
+================================================================================
+PAGE-BY-PAGE TEXT:
+================================================================================
+
+--- PAGE 1 ---
+RÉPUBLIQUE FRANÇAISE
+Liberté Égalité Fraternité
+FRANCE EDUCATION INTERNATIONAL DELF DOLF
+Attestation de Réussite
+Je soussigné-e SCHENKER Jean-Charles
+Président-e du jury au centre d'examen de: 216021 - Tunis - AF (TUNISIE)
+atteste que :
+GUERMAZI Rayen
+date et lieu de naissance : 17/08/2003 à Tunis (TUNISIE)
+numéro de candidat-e: 216013216522
+a présenté avec succès les épreuves de l'examen :
+DALF C1
+Niveau C1 du Cadre européen commun de référence pour les langues
+Session : 202507T à Alliance française de Tunis
+Détail des notes aux différentes épreuves
+Compréhension de l'oral note : 22.0 / 25
+Compréhension des écrits note : 22.5 / 25
+Production écrite note : 21.0 / 25
+Production orale note : 25.0 / 25
+Note finale : 90.5 / 100
+Fait le 29 août 2025
+Alliance française Tunisie
+TUNISIE
+Le DELF et le DALF comportent 7 diplômes
+indépendants :
+DELF A1.1 DELF A1 DELF A2
+DELF B1 DELF B2
+DALF C1 DALF C2
+Le présent document atteste de la réussite au diplôme
+correspondant, en l'attente de la délivrance du
+diplôme définitif.
+Important : cette attestation comporte votre numéro
+d'identification DELF-DALF. Ce numéro est définitif.
+Vous devez le communiquer à chacune de vos
+inscriptions, dans le même centre d'examen ou dans
+un centre différent.
+Cette attestation est délivrée en un seul exemplaire.
+Aucun double ne pourra être établi. Ne vous en
+dessaississez jamais.

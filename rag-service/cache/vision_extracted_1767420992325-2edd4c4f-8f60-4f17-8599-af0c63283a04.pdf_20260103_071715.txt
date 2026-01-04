@@ -1,0 +1,61 @@
+=== VISION-EXTRACTED TEXT DEBUG ===
+Filename: 1767420992325-2edd4c4f-8f60-4f17-8599-af0c63283a04.pdf
+Extracted at: 2026-01-03T07:17:15.252747
+Total pages: 1
+Metadata: {
+  "title": "1767420992325-2edd4c4f-8f60-4f17-8599-af0c63283a04.pdf",
+  "author": "",
+  "subject": "",
+  "creator": "",
+  "creation_date": ""
+}
+
+================================================================================
+FULL TEXT (as sent to chunker):
+================================================================================
+CERTIFICAT D'ACHÈVEMENT
+
+NEXT
+by BH ASSURANCE
+
+Ce certificat atteste que le participant
+GUERMAZI RAYEN
+a mené le challenge à son terme en atteignant la phase finale.
+Cet engagement témoigne de sa motivation, de sa créativité et de ses compétences
+dans le domaine de l'innovation et de l'intelligence artificielle appliquée à l'assurance.
+
+EN PARTENARIAT AVEC :
+optima
+junior entreprise
+
+bhassurance
+www.bh-assurance.com
+
+Fait à Tunis, le 10-9-2025
+Signature & cachet
+
+================================================================================
+PAGE-BY-PAGE TEXT:
+================================================================================
+
+--- PAGE 1 ---
+CERTIFICAT D'ACHÈVEMENT
+
+NEXT
+by BH ASSURANCE
+
+Ce certificat atteste que le participant
+GUERMAZI RAYEN
+a mené le challenge à son terme en atteignant la phase finale.
+Cet engagement témoigne de sa motivation, de sa créativité et de ses compétences
+dans le domaine de l'innovation et de l'intelligence artificielle appliquée à l'assurance.
+
+EN PARTENARIAT AVEC :
+optima
+junior entreprise
+
+bhassurance
+www.bh-assurance.com
+
+Fait à Tunis, le 10-9-2025
+Signature & cachet

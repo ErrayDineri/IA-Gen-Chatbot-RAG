@@ -52,9 +52,9 @@ function App() {
     }
   };
 
-  const handleRetryRag = async (id) => {
+  const handleRetryRag = async (id, processingOptions = {}) => {
     try {
-      await axios.post(`/api/rag/reprocess/${id}`);
+      await axios.post(`/api/rag/reprocess/${id}`, { processingOptions });
       // Poll for updates
       setTimeout(fetchPDFs, 1000);
       setTimeout(fetchPDFs, 3000);

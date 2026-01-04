@@ -1,10 +1,19 @@
-"""Semantic chunking using LangChain's SemanticChunker."""
+"""Chunking strategies for PDF extraction.
+
+Default behavior remains the existing semantic chunker.
+An optional agentic chunker can be enabled via config (CHUNKER_MODE=agentic).
+"""
 
 from typing import List, Dict, Any
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from embeddings import embedding_model
-from config import CHUNK_BREAKPOINT_THRESHOLD_TYPE, CHUNK_BREAKPOINT_THRESHOLD
+from config import (
+    CHUNK_BREAKPOINT_THRESHOLD_TYPE,
+    CHUNK_BREAKPOINT_THRESHOLD,
+    CHUNKER_MODE,
+    AGENTIC_CHUNKER_API_URL,
+)
 
 
 class SemanticDocumentChunker:
@@ -147,3 +156,17 @@ class SemanticDocumentChunker:
 
 # Global instance
 semantic_chunker = SemanticDocumentChunker()
+
+# Import agentic chunker from separate module
+from agentic_chunker import agentic_chunker
+
+
+def get_active_chunker():
+    """Return the configured chunker. Defaults to semantic."""
+    if str(CHUNKER_MODE).lower().strip() == "agentic":
+        print(f"Using agentic chunker via {AGENTIC_CHUNKER_API_URL}")
+        return agentic_chunker
+    return semantic_chunker
+
+
+active_chunker = get_active_chunker()

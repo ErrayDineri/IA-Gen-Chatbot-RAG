@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './PDFUpload.css';
 
@@ -8,6 +8,23 @@ function PDFUpload({ onUploadSuccess }) {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Processing options with defaults
+  const [config, setConfig] = useState({
+    defaults: { extractor_mode: 'text', chunker_mode: 'agentic', merge_window: 3 },
+    options: { extractor_modes: ['text', 'vision'], chunker_modes: ['semantic', 'agentic'], merge_window_range: [0, 5] }
+  });
+  const [extractorMode, setExtractorMode] = useState('');
+  const [chunkerMode, setChunkerMode] = useState('');
+  const [mergeWindow, setMergeWindow] = useState('');
+  
+  // Fetch config on mount
+  useEffect(() => {
+    axios.get('/api/rag/config')
+      .then(res => setConfig(res.data))
+      .catch(() => {}); // Use defaults on error
+  }, []);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -78,6 +95,14 @@ function PDFUpload({ onUploadSuccess }) {
       formData.append('pdfs', file);
     });
     formData.append('tags', tags);
+    
+    // Add processing options (use selected or default)
+    const processingOptions = {
+      extractor_mode: extractorMode || config.defaults.extractor_mode,
+      chunker_mode: chunkerMode || config.defaults.chunker_mode,
+      merge_window: mergeWindow !== '' ? parseInt(mergeWindow) : config.defaults.merge_window
+    };
+    formData.append('processingOptions', JSON.stringify(processingOptions));
 
     setUploading(true);
     setMessage('');
@@ -192,6 +217,89 @@ function PDFUpload({ onUploadSuccess }) {
             placeholder="e.g., research, important, 2024"
             className="tags-input"
           />
+        </div>
+
+        <div className="advanced-options">
+          <button 
+            type="button" 
+            className="advanced-toggle"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Processing Options
+            <svg 
+              width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              style={{ transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+            >
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          
+          {showAdvanced && (
+            <div className="options-panel">
+              <div className="option-row">
+                <label htmlFor="extractor-mode">
+                  <span className="option-label">Extractor</span>
+                  <span className="option-hint">text=fast, vision=OCR</span>
+                </label>
+                <select
+                  id="extractor-mode"
+                  value={extractorMode || config.defaults.extractor_mode}
+                  onChange={(e) => setExtractorMode(e.target.value)}
+                  className="option-select"
+                >
+                  {config.options.extractor_modes.map(mode => (
+                    <option key={mode} value={mode}>
+                      {mode}{mode === config.defaults.extractor_mode ? ' (default)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="option-row">
+                <label htmlFor="chunker-mode">
+                  <span className="option-label">Chunker</span>
+                  <span className="option-hint">semantic=embedding, agentic=LLM</span>
+                </label>
+                <select
+                  id="chunker-mode"
+                  value={chunkerMode || config.defaults.chunker_mode}
+                  onChange={(e) => setChunkerMode(e.target.value)}
+                  className="option-select"
+                >
+                  {config.options.chunker_modes.map(mode => (
+                    <option key={mode} value={mode}>
+                      {mode}{mode === config.defaults.chunker_mode ? ' (default)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="option-row">
+                <label htmlFor="merge-window">
+                  <span className="option-label">Merge Window</span>
+                  <span className="option-hint">0=none, N=N neighbors each side</span>
+                </label>
+                <div className="slider-container">
+                  <input
+                    type="range"
+                    id="merge-window"
+                    min={config.options.merge_window_range[0]}
+                    max={config.options.merge_window_range[1]}
+                    value={mergeWindow !== '' ? mergeWindow : config.defaults.merge_window}
+                    onChange={(e) => setMergeWindow(e.target.value)}
+                    className="option-slider"
+                  />
+                  <span className="slider-value">
+                    {mergeWindow !== '' ? mergeWindow : config.defaults.merge_window}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <button 

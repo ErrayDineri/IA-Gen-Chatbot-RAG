@@ -3,6 +3,53 @@
 import fitz  # PyMuPDF
 from typing import List, Dict, Any
 import os
+import json
+from datetime import datetime
+
+# Cache directory for extracted text
+CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache")
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+def _save_extracted_text_to_cache(filename: str, pdf_data: Dict[str, Any]) -> str:
+    """
+    Save extracted text to cache folder for debugging.
+    Returns the path to the saved file.
+    """
+    try:
+        # Create safe filename
+        safe_name = "".join(c if c.isalnum() or c in "._-" else "_" for c in filename)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        cache_filename = f"extracted_{safe_name}_{timestamp}.txt"
+        cache_path = os.path.join(CACHE_DIR, cache_filename)
+        
+        # Build debug content
+        lines = []
+        lines.append(f"=== EXTRACTED TEXT DEBUG ===")
+        lines.append(f"Filename: {filename}")
+        lines.append(f"Extracted at: {datetime.now().isoformat()}")
+        lines.append(f"Total pages: {pdf_data['total_pages']}")
+        lines.append(f"Metadata: {json.dumps(pdf_data['metadata'], indent=2)}")
+        lines.append("")
+        lines.append("=" * 80)
+        lines.append("FULL TEXT (as sent to chunker):")
+        lines.append("=" * 80)
+        lines.append(pdf_data['full_text'])
+        lines.append("")
+        lines.append("=" * 80)
+        lines.append("PAGE-BY-PAGE TEXT:")
+        lines.append("=" * 80)
+        for page in pdf_data['pages']:
+            lines.append(f"\n--- PAGE {page['page_num']} ---")
+            lines.append(page['text'])
+        
+        with open(cache_path, 'w', encoding='utf-8') as f:
+            f.write("\n".join(lines))
+        
+        print(f"[PDF Extractor] Saved extracted text to: {cache_path}")
+        return cache_path
+    except Exception as e:
+        print(f"[PDF Extractor] Warning: Could not save extracted text to cache: {e}")
+        return ""
 
 
 def extract_text_from_pdf(file_path: str) -> Dict[str, Any]:
@@ -61,6 +108,9 @@ def extract_text_from_pdf(file_path: str) -> Dict[str, Any]:
         
         doc.close()
         
+        # Save extracted text to cache for debugging
+        _save_extracted_text_to_cache(os.path.basename(file_path), result)
+        
         return result
         
     except Exception as e:
@@ -100,7 +150,7 @@ def extract_text_from_bytes(file_bytes: bytes, filename: str = "document.pdf") -
         total_pages = len(doc)
         doc.close()
         
-        return {
+        result = {
             "pages": pages,
             "total_pages": total_pages,
             "metadata": {
@@ -112,6 +162,11 @@ def extract_text_from_bytes(file_bytes: bytes, filename: str = "document.pdf") -
             },
             "full_text": "\n\n".join(full_text_parts)
         }
+        
+        # Save extracted text to cache for debugging
+        _save_extracted_text_to_cache(filename, result)
+        
+        return result
         
     except Exception as e:
         raise Exception(f"Error extracting text from PDF bytes: {str(e)}")
