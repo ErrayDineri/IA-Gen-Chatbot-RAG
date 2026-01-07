@@ -1,0 +1,198 @@
+=== EXTRACTED TEXT DEBUG ===
+Filename: 1767691360442-b5701184-7496-4a00-8c91-35455773c051.pdf
+Extracted at: 2026-01-06T10:22:40.467963
+Total pages: 2
+Metadata: {
+  "title": "Rayen Guermazi \u2013 Student in 2nd year Computer Engineering at Universit\u00e9 SESAME",
+  "author": "Rayen Guermazi",
+  "subject": "R\u00e9sum\u00e9 of Rayen Guermazi",
+  "creator": "LaTeX with 'moderncv' package",
+  "creation_date": "D:20251202185222Z"
+}
+
+================================================================================
+FULL TEXT (as sent to chunker):
+================================================================================
+Rayen Guermazi
+Student in 2nd year Computer
+Engineering at Universit´e SESAME
+I +216 55 374 307
+# rayen.guermazi@sesame.com.tn
+§ ErrayDineri
+ð rayen-guermazi-16a2a22b3
+Education
+2025-2026
+2nd year engineering student, Universit´e SESAME
+2024-2025
+1st year engineering student, Universit´e SESAME
+2022-2024
+Integrated Preparatory Program
+2022
+Baccalaureate, Experimental Sciences, Highest Honors
+Skills
+Languages
+Python, C++, C, Java
+Frameworks
+PyTorch, Hugging Face Transformers, NodeJS, Django, React, Selenium
+Methodology &
+Tools
+Scrum, Docker, Git/GitHub, N8N, Postman, BurpSuite
+Systems and
+environments
+Linux (Arch and Debian), Windows, WSL
+Soft Skills
+Problem solving, Adaptability, Teamwork
+Languages
+French (DALF C1), English (Advanced), Arabic
+Experience
+2025
+Data Science and AI Intern, Get-Wireless, Tunis
+Design and development of a full-stack web solution integrating AI models for assistance in radiological
+diagnosis, including medical image processing, data augmentation pipelines and secure deployment.
+2024
+IT Intern, LaCroix Electronics, Zaghouan
+Technical support.
+Projects
+Insurance ChatBot with RAG pipeline and tool calls
+Insurance ChatBot able to answer clients’ questions about BH Assurance products, about their
+contracts and claim statuses and to generate a quote on request.
+○Stack : Python, LM Studio, FastAPI, React, Hugging Face Transformers, ChromaDB
+WhatsApp AI Agent
+AI agent capable of reading and replying to WhatsApp messages supporting French and English.
+○Stack : Python, N8N, NodeJS, ollama
+Customer Service Email Auto-responder by AI
+Intent detection system and automatic response generation for incoming emails using LoRA fine-tuning
+and various prompt engineering techniques (few shots etc.)
+○Stack : Python, OpenAI API, NVIDIA NeMo
+Certifications
+CyberTalents
+Introduction to CyberSecurity
+Cisco
+Cisco Certified Support Technician Cybersecurity
+1/2
+
+IT Specialist
+Python, Java
+DataCamp
+AI Fundamentals, Data Literacy, AWS Cloud Practitioner
+Kaggle
+Intro to Machine Learning
+NVIDIA
+Efficient Large Language Model Customization
+Leadership and activities
+2025 – Present
+Project Manager — SESAME Junior Enterprise
+Steering the Junior Enterprise project process: project design, task distribution and team supervision.
+2024 – 2025
+Active member — Securinets INSAT, Securinets TEK’UP
+Participation in bootcamps, workshops and cybersecurity competitions.
+2023 – 2024
+Active member — IEEE SESAME Student Branch
+Organization of hackathons and trainings.
+Competitions and technicals
+CyberSecurity
+Securinets INSAT Friendly (TOP 5 among 300+) • MiniCTF TEK’UP • Sparks
+MiniCTF • DarkestHour CTF
+Identification and exploitation of Web vulnerabilities, forensic analysis and recovery of sensitive
+information etc...
+Competitive
+Programming
+CodeForces • LeetCode • WinterCup INSAT • IEEEXtreme 17/18 • IEEE TechX
+Yesist 12 (TOP 9)
+Solving complex problems in an optimized way using algorithms ensuring minimal complexity.
+2/2
+
+================================================================================
+PAGE-BY-PAGE TEXT:
+================================================================================
+
+--- PAGE 1 ---
+Rayen Guermazi
+Student in 2nd year Computer
+Engineering at Universit´e SESAME
+I +216 55 374 307
+# rayen.guermazi@sesame.com.tn
+§ ErrayDineri
+ð rayen-guermazi-16a2a22b3
+Education
+2025-2026
+2nd year engineering student, Universit´e SESAME
+2024-2025
+1st year engineering student, Universit´e SESAME
+2022-2024
+Integrated Preparatory Program
+2022
+Baccalaureate, Experimental Sciences, Highest Honors
+Skills
+Languages
+Python, C++, C, Java
+Frameworks
+PyTorch, Hugging Face Transformers, NodeJS, Django, React, Selenium
+Methodology &
+Tools
+Scrum, Docker, Git/GitHub, N8N, Postman, BurpSuite
+Systems and
+environments
+Linux (Arch and Debian), Windows, WSL
+Soft Skills
+Problem solving, Adaptability, Teamwork
+Languages
+French (DALF C1), English (Advanced), Arabic
+Experience
+2025
+Data Science and AI Intern, Get-Wireless, Tunis
+Design and development of a full-stack web solution integrating AI models for assistance in radiological
+diagnosis, including medical image processing, data augmentation pipelines and secure deployment.
+2024
+IT Intern, LaCroix Electronics, Zaghouan
+Technical support.
+Projects
+Insurance ChatBot with RAG pipeline and tool calls
+Insurance ChatBot able to answer clients’ questions about BH Assurance products, about their
+contracts and claim statuses and to generate a quote on request.
+○Stack : Python, LM Studio, FastAPI, React, Hugging Face Transformers, ChromaDB
+WhatsApp AI Agent
+AI agent capable of reading and replying to WhatsApp messages supporting French and English.
+○Stack : Python, N8N, NodeJS, ollama
+Customer Service Email Auto-responder by AI
+Intent detection system and automatic response generation for incoming emails using LoRA fine-tuning
+and various prompt engineering techniques (few shots etc.)
+○Stack : Python, OpenAI API, NVIDIA NeMo
+Certifications
+CyberTalents
+Introduction to CyberSecurity
+Cisco
+Cisco Certified Support Technician Cybersecurity
+1/2
+
+--- PAGE 2 ---
+IT Specialist
+Python, Java
+DataCamp
+AI Fundamentals, Data Literacy, AWS Cloud Practitioner
+Kaggle
+Intro to Machine Learning
+NVIDIA
+Efficient Large Language Model Customization
+Leadership and activities
+2025 – Present
+Project Manager — SESAME Junior Enterprise
+Steering the Junior Enterprise project process: project design, task distribution and team supervision.
+2024 – 2025
+Active member — Securinets INSAT, Securinets TEK’UP
+Participation in bootcamps, workshops and cybersecurity competitions.
+2023 – 2024
+Active member — IEEE SESAME Student Branch
+Organization of hackathons and trainings.
+Competitions and technicals
+CyberSecurity
+Securinets INSAT Friendly (TOP 5 among 300+) • MiniCTF TEK’UP • Sparks
+MiniCTF • DarkestHour CTF
+Identification and exploitation of Web vulnerabilities, forensic analysis and recovery of sensitive
+information etc...
+Competitive
+Programming
+CodeForces • LeetCode • WinterCup INSAT • IEEEXtreme 17/18 • IEEE TechX
+Yesist 12 (TOP 9)
+Solving complex problems in an optimized way using algorithms ensuring minimal complexity.
+2/2

@@ -1,0 +1,257 @@
+=== EXTRACTED TEXT DEBUG ===
+Filename: 1767688335808-1fc97342-7969-487b-b8cd-c880a7a9cbbe.pdf
+Extracted at: 2026-01-06T09:32:15.967568
+Total pages: 5
+Metadata: {
+  "title": "Cahier des Charges - SShare",
+  "author": "Rayen Guermazi, Feriel Nouri",
+  "subject": "",
+  "creator": "LaTeX with hyperref",
+  "creation_date": "D:20251023105340Z"
+}
+
+================================================================================
+FULL TEXT (as sent to chunker):
+================================================================================
+Cahier des Charges
+Projet SShare
+Période du projet : du 06 octobre 2025 au 19 janvier 2026
+Équipe Projet
+Project Manager :
+Rayen Guermazi
+Test Manager :
+Feriel Nouri
+Developer :
+Haroun Malek Hammami
+Dernière mise à jour : 23 octobre 2025
+
+1. Introduction
+Le présent document constitue le cahier des charges du projet SShare. Il a pour
+objectif de cadrer le besoin, de définir les grandes orientations du produit à concevoir et de
+servir de base à la rédaction ultérieure du document de spécifications fonctionnelles
+et techniques détaillées.
+Le projet SShare s’inscrit dans une logique de développement agile, selon la méthodo-
+logie Scrum, avec un cycle de développement itératif et incrémental.
+2. Présentation du projet
+2.1. Contexte
+Dans un contexte où la transmission des savoirs et le développement des compétences
+deviennent essentiels, il est nécessaire de disposer d’un outil collaboratif permettant aux
+individus d’apprendre les uns des autres. Le projet SShare vise à répondre à ce besoin en
+offrant une plateforme communautaire axée sur le partage, l’enseignement et l’apprentis-
+sage des compétences.
+2.2. Objectif général
+Mettre en place une plateforme web collaborative qui connecte les membres d’une com-
+munauté afin qu’ils puissent partager leurs compétences, enseigner des savoirs spécifiques,
+et apprendre de leurs pairs.
+3. Objectifs du projet
+— Offrir un espace communautaire favorisant la mise en relation de personnes parta-
+geant des intérêts communs.
+— Permettre la publication, la recherche et la consultation d’offres de formation ou de
+tutoriels.
+— Valoriser les compétences des membres à travers leurs profils, leurs contributions et
+les retours de la communauté.
+— Garantir une expérience utilisateur fluide, intuitive et moderne.
+4. Cahier des charges fonctionnel (vue d’ensemble)
+Cette section présente les grandes fonctionnalités envisagées à ce stade. Elles
+feront l’objet d’une description plus détaillée dans le document de spécifications fonction-
+nelles à venir.
+1
+
+4.1. Fonctionnalités principales (prévisionnelles)
+— Gestion des utilisateurs : création de compte, authentification, profils, rôles.
+— Partage de compétences : ajout et gestion de fiches de compétences.
+— Recherche : filtres multicritères (mots-clés, catégories, niveau, etc.).
+— Communication : messagerie interne et notifications.
+— Évaluation : notation, commentaires, badges ou niveaux de réputation.
+— Tableau de bord personnel : suivi des activités, formations, statistiques.
+4.2. Rôles utilisateurs (provisoires)
+— Administrateur : supervision, gestion et modération.
+— Membre : consultation, participation et évaluation.
+— Formateur : création et animation de sessions de formation.
+4.3. Évolutions futures (à spécifier)
+Des fonctionnalités complémentaires pourront être précisées dans la phase de spécifi-
+cations :
+— Système de recommandations basé sur les interactions.
+— Intégration de sessions en visioconférence.
+— Historique d’apprentissage et suivi de progression.
+5. Cahier des charges technique (préliminaire)
+Cette section fixe les grandes orientations techniques. Les détails d’implémentation
+seront définis dans le document de spécifications techniques détaillées.
+5.1. Environnement technique
+— Langage : C#
+— Framework : ASP.NET Core MVC
+— Base de données : PostgreSQL
+— Front-end : ReactJS
+— Outils : GitHub (versionning), Azure DevOps (planification et CI/CD)
+2
+
+5.2. Architecture visée
+Une architecture modulaire et évolutive sera privilégiée, basée sur un modèle MVC
+avec séparation claire des responsabilités (présentation, logique métier, données). Les dé-
+tails d’architecture feront partie du document de conception.
+6. Besoins non fonctionnels
+— Performance : rapidité et fluidité de l’application.
+— Sécurité : gestion des accès, protection des données personnelles et chiffrement des
+échanges.
+— Fiabilité : tolérance aux erreurs et journalisation complète des événements.
+— Accessibilité : interface responsive, conforme aux standards W3C.
+— Évolutivité : conception permettant l’ajout ultérieur de nouvelles fonctionnalités.
+— Traçabilité : intégration avec SquashTM et Azure DevOps pour assurer la couver-
+ture test/besoin.
+7. Méthodologie et gestion du projet
+7.1. Approche Scrum
+Le projet est conduit selon la méthodologie Scrum :
+— Sprints d’une semaine.
+— Product backlog géré via Azure DevOps.
+— Daily meetings, revues et rétrospectives régulières.
+7.2. Suivi et qualité
+— Azure DevOps : suivi des tâches, bugs, user stories et vélocité.
+— GitHub : intégration continue, gestion des branches et pull requests.
+— SquashTM : gestion et exécution des tests fonctionnels et de validation.
+8. Organisation de l’équipe
+— Rayen Guermazi — Projet Manager : coordination, planification et suivi glo-
+bal.
+— Feriel Nouri — Test Manager : stratégie de test, conception des cas de test,
+suivi qualité.
+3
+
+9. Planning prévisionnel
+Période du projet : du 06 octobre 2025 au 19 janvier 2026. Phases prévues :
+1. Lancement et cadrage du projet.
+2. Rédaction du cahier des charges (présent document).
+3. Rédaction du document de spécifications fonctionnelles et techniques.
+4. Développement back-end et front-end.
+5. Intégration et validation via SquashTM.
+6. Livraison et documentation finale.
+10. Conclusion
+Le présent cahier des charges constitue la première étape du projet SShare. Il définit
+le périmètre général, les besoins exprimés et les contraintes principales. Les détails fonc-
+tionnels et techniques seront précisés dans le document de spécifications, qui viendra
+compléter et approfondir les éléments décrits ici.
+4
+
+================================================================================
+PAGE-BY-PAGE TEXT:
+================================================================================
+
+--- PAGE 1 ---
+Cahier des Charges
+Projet SShare
+Période du projet : du 06 octobre 2025 au 19 janvier 2026
+Équipe Projet
+Project Manager :
+Rayen Guermazi
+Test Manager :
+Feriel Nouri
+Developer :
+Haroun Malek Hammami
+Dernière mise à jour : 23 octobre 2025
+
+--- PAGE 2 ---
+1. Introduction
+Le présent document constitue le cahier des charges du projet SShare. Il a pour
+objectif de cadrer le besoin, de définir les grandes orientations du produit à concevoir et de
+servir de base à la rédaction ultérieure du document de spécifications fonctionnelles
+et techniques détaillées.
+Le projet SShare s’inscrit dans une logique de développement agile, selon la méthodo-
+logie Scrum, avec un cycle de développement itératif et incrémental.
+2. Présentation du projet
+2.1. Contexte
+Dans un contexte où la transmission des savoirs et le développement des compétences
+deviennent essentiels, il est nécessaire de disposer d’un outil collaboratif permettant aux
+individus d’apprendre les uns des autres. Le projet SShare vise à répondre à ce besoin en
+offrant une plateforme communautaire axée sur le partage, l’enseignement et l’apprentis-
+sage des compétences.
+2.2. Objectif général
+Mettre en place une plateforme web collaborative qui connecte les membres d’une com-
+munauté afin qu’ils puissent partager leurs compétences, enseigner des savoirs spécifiques,
+et apprendre de leurs pairs.
+3. Objectifs du projet
+— Offrir un espace communautaire favorisant la mise en relation de personnes parta-
+geant des intérêts communs.
+— Permettre la publication, la recherche et la consultation d’offres de formation ou de
+tutoriels.
+— Valoriser les compétences des membres à travers leurs profils, leurs contributions et
+les retours de la communauté.
+— Garantir une expérience utilisateur fluide, intuitive et moderne.
+4. Cahier des charges fonctionnel (vue d’ensemble)
+Cette section présente les grandes fonctionnalités envisagées à ce stade. Elles
+feront l’objet d’une description plus détaillée dans le document de spécifications fonction-
+nelles à venir.
+1
+
+--- PAGE 3 ---
+4.1. Fonctionnalités principales (prévisionnelles)
+— Gestion des utilisateurs : création de compte, authentification, profils, rôles.
+— Partage de compétences : ajout et gestion de fiches de compétences.
+— Recherche : filtres multicritères (mots-clés, catégories, niveau, etc.).
+— Communication : messagerie interne et notifications.
+— Évaluation : notation, commentaires, badges ou niveaux de réputation.
+— Tableau de bord personnel : suivi des activités, formations, statistiques.
+4.2. Rôles utilisateurs (provisoires)
+— Administrateur : supervision, gestion et modération.
+— Membre : consultation, participation et évaluation.
+— Formateur : création et animation de sessions de formation.
+4.3. Évolutions futures (à spécifier)
+Des fonctionnalités complémentaires pourront être précisées dans la phase de spécifi-
+cations :
+— Système de recommandations basé sur les interactions.
+— Intégration de sessions en visioconférence.
+— Historique d’apprentissage et suivi de progression.
+5. Cahier des charges technique (préliminaire)
+Cette section fixe les grandes orientations techniques. Les détails d’implémentation
+seront définis dans le document de spécifications techniques détaillées.
+5.1. Environnement technique
+— Langage : C#
+— Framework : ASP.NET Core MVC
+— Base de données : PostgreSQL
+— Front-end : ReactJS
+— Outils : GitHub (versionning), Azure DevOps (planification et CI/CD)
+2
+
+--- PAGE 4 ---
+5.2. Architecture visée
+Une architecture modulaire et évolutive sera privilégiée, basée sur un modèle MVC
+avec séparation claire des responsabilités (présentation, logique métier, données). Les dé-
+tails d’architecture feront partie du document de conception.
+6. Besoins non fonctionnels
+— Performance : rapidité et fluidité de l’application.
+— Sécurité : gestion des accès, protection des données personnelles et chiffrement des
+échanges.
+— Fiabilité : tolérance aux erreurs et journalisation complète des événements.
+— Accessibilité : interface responsive, conforme aux standards W3C.
+— Évolutivité : conception permettant l’ajout ultérieur de nouvelles fonctionnalités.
+— Traçabilité : intégration avec SquashTM et Azure DevOps pour assurer la couver-
+ture test/besoin.
+7. Méthodologie et gestion du projet
+7.1. Approche Scrum
+Le projet est conduit selon la méthodologie Scrum :
+— Sprints d’une semaine.
+— Product backlog géré via Azure DevOps.
+— Daily meetings, revues et rétrospectives régulières.
+7.2. Suivi et qualité
+— Azure DevOps : suivi des tâches, bugs, user stories et vélocité.
+— GitHub : intégration continue, gestion des branches et pull requests.
+— SquashTM : gestion et exécution des tests fonctionnels et de validation.
+8. Organisation de l’équipe
+— Rayen Guermazi — Projet Manager : coordination, planification et suivi glo-
+bal.
+— Feriel Nouri — Test Manager : stratégie de test, conception des cas de test,
+suivi qualité.
+3
+
+--- PAGE 5 ---
+9. Planning prévisionnel
+Période du projet : du 06 octobre 2025 au 19 janvier 2026. Phases prévues :
+1. Lancement et cadrage du projet.
+2. Rédaction du cahier des charges (présent document).
+3. Rédaction du document de spécifications fonctionnelles et techniques.
+4. Développement back-end et front-end.
+5. Intégration et validation via SquashTM.
+6. Livraison et documentation finale.
+10. Conclusion
+Le présent cahier des charges constitue la première étape du projet SShare. Il définit
+le périmètre général, les besoins exprimés et les contraintes principales. Les détails fonc-
+tionnels et techniques seront précisés dans le document de spécifications, qui viendra
+compléter et approfondir les éléments décrits ici.
+4

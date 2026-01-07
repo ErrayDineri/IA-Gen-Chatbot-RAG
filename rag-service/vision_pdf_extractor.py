@@ -180,7 +180,7 @@ async def _extract_page_with_vision(
 Rules:
 1. Preserve the original text layout and structure
 2. For images/charts/figures, add a brief description in [square brackets]
-3. For tables, output it in markdown formatting Use | column separators and a header separator row (---|---|---). Make sure it's correct.
+3. For tables, output it in plain text.
 4. Include headers, footers, page numbers if visible
 5. No commentary - just output the content
 

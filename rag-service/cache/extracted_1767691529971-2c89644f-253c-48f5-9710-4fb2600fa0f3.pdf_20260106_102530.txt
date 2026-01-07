@@ -1,0 +1,104 @@
+=== EXTRACTED TEXT DEBUG ===
+Filename: 1767691529971-2c89644f-253c-48f5-9710-4fb2600fa0f3.pdf
+Extracted at: 2026-01-06T10:25:30.030877
+Total pages: 2
+Metadata: {
+  "title": "",
+  "author": "",
+  "subject": "",
+  "creator": "TeX",
+  "creation_date": "D:20251016164930Z"
+}
+
+================================================================================
+FULL TEXT (as sent to chunker):
+================================================================================
+Rayen GUERMAZI
+Étudiant en cycle ingénieur en Informatique
+Université SESAME
+rayen.guermazi@sesame.com.tn
+À l’attention du comité d’admission,
+École Télécom SudParis
+Le 14 octobre 2025
+Lettre de motivation
+Objet : Candidature à un cursus de double diplôme en informatique — Télé-
+com SudParis
+Monsieur le Directeur de Télécom SudParis,
+Actuellement étudiant en deuxième année du cycle ingénieur en Informatique à l’Univer-
+sité SESAME, je souhaite vivement intégrer le programme de double diplôme proposé par
+Télécom SudParis. Je suis passionné par l’intelligence artificielle et la cybersécurité et le
+parcours de Télécom SudParis s’aligne parfaitement avec mes aspirations.
+Mon parcours académique m’a permis de développer une solide expertise en développe-
+ment web, cybersécurité et IA. Cependant, je souhaite approfondir mes connaissances et
+compétences dans un environnement académique d’excellence. La réputation de Télécom
+SudParis, reconnue pour la qualité de son enseignement et l’innovation de ses projets, en
+fait l’établissement idéal pour atteindre cet objectif.
+En parallèle, j’ai eu l’opportunité de m’engager au sein de divers clubs et associations,
+notamment en tant que Responsable Projets à SESAME Junior Entreprise, ce qui m’a per-
+mis de renforcer mes compétences en leadership, en communication et en gestion d’équipe.
+Ces expériences m’ont appris à collaborer dans des environnements dynamiques, à mener
+des projets à terme et à faire preuve d’adaptabilité.
+Je suis également très motivé par l’idée d’acquérir une expérience internationale. Choisir
+un cursus de double diplôme à Télécom SudParis représente pour moi une chance ines-
+timable d’élargir mes horizons tout en développant des compétences essentielles dans un
+monde globalisé. Ce choix est motivé par la reconnaissance internationale de votre ins-
+titution et les partenariats avec des universités prestigieuses qui enrichissent le parcours
+académique.
+1
+
+Ce double diplôme représente une étape clé dans mon parcours, me permettant de conju-
+guer rigueur académique, mise en pratique et ouverture sur les défis technologiques de
+demain. Je serais honoré de pouvoir vous exposer ma motivation plus en détail lors d’un
+entretien. Je me tiens à votre disposition pour toute information complémentaire.
+Je vous prie d’agréer, Monsieur le Directeur de Télécom SudParis, l’expression de mes
+salutations distinguées.
+Rayen GUERMAZI
+2
+
+================================================================================
+PAGE-BY-PAGE TEXT:
+================================================================================
+
+--- PAGE 1 ---
+Rayen GUERMAZI
+Étudiant en cycle ingénieur en Informatique
+Université SESAME
+rayen.guermazi@sesame.com.tn
+À l’attention du comité d’admission,
+École Télécom SudParis
+Le 14 octobre 2025
+Lettre de motivation
+Objet : Candidature à un cursus de double diplôme en informatique — Télé-
+com SudParis
+Monsieur le Directeur de Télécom SudParis,
+Actuellement étudiant en deuxième année du cycle ingénieur en Informatique à l’Univer-
+sité SESAME, je souhaite vivement intégrer le programme de double diplôme proposé par
+Télécom SudParis. Je suis passionné par l’intelligence artificielle et la cybersécurité et le
+parcours de Télécom SudParis s’aligne parfaitement avec mes aspirations.
+Mon parcours académique m’a permis de développer une solide expertise en développe-
+ment web, cybersécurité et IA. Cependant, je souhaite approfondir mes connaissances et
+compétences dans un environnement académique d’excellence. La réputation de Télécom
+SudParis, reconnue pour la qualité de son enseignement et l’innovation de ses projets, en
+fait l’établissement idéal pour atteindre cet objectif.
+En parallèle, j’ai eu l’opportunité de m’engager au sein de divers clubs et associations,
+notamment en tant que Responsable Projets à SESAME Junior Entreprise, ce qui m’a per-
+mis de renforcer mes compétences en leadership, en communication et en gestion d’équipe.
+Ces expériences m’ont appris à collaborer dans des environnements dynamiques, à mener
+des projets à terme et à faire preuve d’adaptabilité.
+Je suis également très motivé par l’idée d’acquérir une expérience internationale. Choisir
+un cursus de double diplôme à Télécom SudParis représente pour moi une chance ines-
+timable d’élargir mes horizons tout en développant des compétences essentielles dans un
+monde globalisé. Ce choix est motivé par la reconnaissance internationale de votre ins-
+titution et les partenariats avec des universités prestigieuses qui enrichissent le parcours
+académique.
+1
+
+--- PAGE 2 ---
+Ce double diplôme représente une étape clé dans mon parcours, me permettant de conju-
+guer rigueur académique, mise en pratique et ouverture sur les défis technologiques de
+demain. Je serais honoré de pouvoir vous exposer ma motivation plus en détail lors d’un
+entretien. Je me tiens à votre disposition pour toute information complémentaire.
+Je vous prie d’agréer, Monsieur le Directeur de Télécom SudParis, l’expression de mes
+salutations distinguées.
+Rayen GUERMAZI
+2
